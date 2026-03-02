@@ -31,7 +31,7 @@ export const VisualizerProvider = ({ children }) => {
     };
 
     return (
-        <VisualizerContext.Provider value={{ configRefs: configRefs.current, uiState, updateConfig }}>
+        <VisualizerContext.Provider value={{ configRefs: configRefs, uiState, updateConfig }}>
             {children}
         </VisualizerContext.Provider>
     );
