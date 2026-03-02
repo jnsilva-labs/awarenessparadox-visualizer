@@ -5,7 +5,7 @@ const VisualizerContext = createContext(null);
 export const useVisualizerConfig = () => useContext(VisualizerContext);
 
 export const VisualizerProvider = ({ children }) => {
-    // We use Refs for continuous sliding values so the 60fps render loop 
+    // We use Refs for all visualizer config values so the 60fps render loop 
     // can read them instantly without triggering heavy React re-renders.
     const configRefs = useRef({
         sensitivity: 1.0,     // 0.1 to 3.0
@@ -15,23 +15,16 @@ export const VisualizerProvider = ({ children }) => {
         theme: 'sacred',      // 'sacred', 'cyberpunk', 'abyssal'
     });
 
-    // We also use state to manually force re-renders ONLY for the UI Control Panel itself
-    // when the user is dragging the sliders. The canvas ignores this state.
-    const [uiState, setUiState] = useState({
-        sensitivity: 1.0,
-        bloomGlow: 1.0,
-        cameraSpeed: 1.0,
-        geometryDensity: 1.0,
-        theme: 'sacred'
-    });
-
     const updateConfig = (key, value) => {
         configRefs.current[key] = value;
-        setUiState(prev => ({ ...prev, [key]: value }));
     };
 
+    // The context value is memoized and NEVER structurally changes.
+    // This perfectly insulates the sensitive WebGL Postprocessing stack from React's render lifecycle
+    const contextValue = React.useMemo(() => ({ configRefs, updateConfig }), []);
+
     return (
-        <VisualizerContext.Provider value={{ configRefs: configRefs, uiState, updateConfig }}>
+        <VisualizerContext.Provider value={contextValue}>
             {children}
         </VisualizerContext.Provider>
     );

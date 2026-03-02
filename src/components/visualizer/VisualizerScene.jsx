@@ -10,15 +10,19 @@ import { useVisualizerConfig } from '../ui/VisualizerContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
-const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs, theme }) => {
+const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs }) => {
+
     const bloomRef = useRef();
     const caRef = useRef();
     const glitchRef = useRef();
+    const hueRef = useRef();
+    const contrastRef = useRef();
+
     // Pre-allocate vector to prevent garbage collection stutter
     const vec2 = useMemo(() => new THREE.Vector2(0, 0), []);
 
     useFrame(() => {
-        if (!bloomRef.current || !caRef.current || !glitchRef.current || !audioDataRef.current) return;
+        if (!bloomRef.current || !caRef.current || !glitchRef.current || !hueRef.current || !contrastRef.current || !audioDataRef.current) return;
 
         const audioData = audioDataRef.current;
 
@@ -113,26 +117,49 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs, theme }) => 
 
     });
 
-    // Determine static color grading from the active theme
-    let hueRotate = 0;
-    let saturationOffset = 0;
-    let brightnessOffset = 0;
-    let contrastOffset = 0;
+    // Static Color Grading mutations (Done in useFrame to avoid structural Circular JSON crashes)
+    useFrame(() => {
+        if (!hueRef.current || !contrastRef.current || !configRefs.current) return;
 
-    if (theme === 'cyberpunk') {
-        hueRotate = -120 * (Math.PI / 180); // Radian conversion
-        saturationOffset = 1.0; // Force 200% saturation
-        contrastOffset = 0.1; // +10% contrast
-    } else if (theme === 'abyssal') {
-        saturationOffset = -1.0; // Grayscale
-        contrastOffset = 0.3; // +30% contrast
-        brightnessOffset = -0.15; // Moderate darkening
-    }
+        let hueRotate = 0;
+        let saturationOffset = 0;
+        let brightnessOffset = 0;
+        let contrastOffset = 0;
+
+        const activeTheme = configRefs.current.theme || 'sacred';
+
+        if (activeTheme === 'cyberpunk') {
+            hueRotate = -120 * (Math.PI / 180); // Radian conversion
+            saturationOffset = 1.0; // Force 200% saturation
+            contrastOffset = 0.1; // +10% contrast
+        } else if (activeTheme === 'abyssal') {
+            saturationOffset = -1.0; // Grayscale
+            contrastOffset = 0.3; // +30% contrast
+            brightnessOffset = -0.15; // Moderate darkening
+        }
+
+        // Must safely set postprocessing uniforms directly in the loop
+        if (typeof hueRef.current.hue === 'number') {
+            hueRef.current.hue = hueRotate;
+            hueRef.current.saturation = saturationOffset;
+        } else if (hueRef.current.hue?.value !== undefined) {
+            hueRef.current.hue.value = hueRotate;
+            hueRef.current.saturation.value = saturationOffset;
+        }
+
+        if (typeof contrastRef.current.brightness === 'number') {
+            contrastRef.current.brightness = brightnessOffset;
+            contrastRef.current.contrast = contrastOffset;
+        } else if (contrastRef.current.brightness?.value !== undefined) {
+            contrastRef.current.brightness.value = brightnessOffset;
+            contrastRef.current.contrast.value = contrastOffset;
+        }
+    });
 
     return (
         <EffectComposer disableNormalPass>
-            <HueSaturation hue={hueRotate} saturation={saturationOffset} />
-            <BrightnessContrast brightness={brightnessOffset} contrast={contrastOffset} />
+            <HueSaturation ref={hueRef} />
+            <BrightnessContrast ref={contrastRef} />
 
             <Bloom ref={bloomRef} luminanceThreshold={0.98} luminanceSmoothing={0.9} intensity={0.05} mipmapBlur />
 
@@ -413,7 +440,7 @@ const SentientCinematicDirector = ({ audioDataRef, configRefs }) => {
 // Isolate the Canvas from the AudioProvider context re-renders.
 // EffectComposer is notoriously buggy when forced to re-render dynamically, 
 // causing "circular JSON" DevTools/HMR crashes when it tries to remount passes.
-const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs, theme }) => {
+const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs }) => {
     return (
         <Canvas
             shadows={false}
@@ -429,9 +456,9 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs, theme
                 <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
                 {/* Elite Reactive Rendering */}
-                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} theme={theme} />
+                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
                 <KinematicCameraShake audioDataRef={audioDataRef} configRefs={configRefs} />
-                <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+                <SacredSigilFlashes audioDataRef={audioDataRef} configRefs={configRefs} />
                 <SentientCinematicDirector audioDataRef={audioDataRef} configRefs={configRefs} />
             </Suspense>
         </Canvas>
@@ -440,7 +467,7 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs, theme
 
 export const VisualizerScene = () => {
     const { audioDataRef } = useAudio();
-    const { configRefs, uiState } = useVisualizerConfig();
+    const { configRefs } = useVisualizerConfig(); // Context is completely sealed, so this never causes a re-render.
 
     // A stable, lightweight check for mobile screen sizes
     const [isMobile, setIsMobile] = React.useState(false);
@@ -454,7 +481,7 @@ export const VisualizerScene = () => {
 
     return (
         <div className="absolute inset-0 w-full h-full z-0">
-            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} theme={uiState.theme} />
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
         </div>
     );
 };

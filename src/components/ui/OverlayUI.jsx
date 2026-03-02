@@ -4,7 +4,7 @@ import { useVisualizerConfig } from './VisualizerContext';
 
 export const OverlayUI = () => {
     const { isPlaying, isMicActive, processAudio, startMicrophoneCapture, stopAudio, audioDataRef, audioDevices } = useAudio();
-    const { uiState, updateConfig } = useVisualizerConfig();
+    const { configRefs, updateConfig } = useVisualizerConfig(); // uiState was deleted to save the WebGL Engine
 
     const fileInputRef = useRef(null);
     const titleRef = useRef(null);
@@ -12,6 +12,16 @@ export const OverlayUI = () => {
     const [debugLogs, setDebugLogs] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
     const [showControls, setShowControls] = useState(false);
+
+    // We need a dummy state strictly to force the React UI to repaint when a slider moves, 
+    // since configRefs mutations will not trigger a re-render.
+    const [uiRenderTick, setUiRenderTick] = useState(0);
+
+    // Wrapper function to update the config and force the UI to repaint
+    const handleSliderChange = (key, value) => {
+        updateConfig(key, value);
+        setUiRenderTick(t => t + 1);
+    };
 
     // Global Error Catcher for On-Screen Debugging
     useEffect(() => {
@@ -181,8 +191,8 @@ export const OverlayUI = () => {
                                 </label>
                                 <select
                                     className="px-3 py-2 bg-black/50 border border-white/20 text-white/90 rounded-sm text-[10px] md:text-xs tracking-wider uppercase outline-none focus:border-ethereal-blue transition-colors"
-                                    value={uiState.theme}
-                                    onChange={(e) => updateConfig('theme', e.target.value)}
+                                    value={configRefs.current.theme}
+                                    onChange={(e) => handleSliderChange('theme', e.target.value)}
                                 >
                                     <option value="sacred">Sacred Alchemy (Default)</option>
                                     <option value="cyberpunk">Cyberpunk Matrix</option>
@@ -194,12 +204,12 @@ export const OverlayUI = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
                                     <span>Reactivity Override</span>
-                                    <span>{uiState.sensitivity.toFixed(1)}x</span>
+                                    <span>{configRefs.current.sensitivity.toFixed(1)}x</span>
                                 </label>
                                 <input
                                     type="range" min="0.1" max="3.0" step="0.1"
-                                    value={uiState.sensitivity}
-                                    onChange={(e) => updateConfig('sensitivity', parseFloat(e.target.value))}
+                                    value={configRefs.current.sensitivity}
+                                    onChange={(e) => handleSliderChange('sensitivity', parseFloat(e.target.value))}
                                     className="w-full accent-ethereal-blue"
                                 />
                             </div>
@@ -208,12 +218,12 @@ export const OverlayUI = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
                                     <span>Orbital Momentum</span>
-                                    <span>{uiState.cameraSpeed.toFixed(1)}x</span>
+                                    <span>{configRefs.current.cameraSpeed.toFixed(1)}x</span>
                                 </label>
                                 <input
                                     type="range" min="0.1" max="3.0" step="0.1"
-                                    value={uiState.cameraSpeed}
-                                    onChange={(e) => updateConfig('cameraSpeed', parseFloat(e.target.value))}
+                                    value={configRefs.current.cameraSpeed}
+                                    onChange={(e) => handleSliderChange('cameraSpeed', parseFloat(e.target.value))}
                                     className="w-full accent-ethereal-blue"
                                 />
                             </div>
@@ -222,12 +232,12 @@ export const OverlayUI = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
                                     <span>Luminescence Output</span>
-                                    <span>{uiState.bloomGlow.toFixed(1)}x</span>
+                                    <span>{configRefs.current.bloomGlow.toFixed(1)}x</span>
                                 </label>
                                 <input
                                     type="range" min="0.0" max="3.0" step="0.1"
-                                    value={uiState.bloomGlow}
-                                    onChange={(e) => updateConfig('bloomGlow', parseFloat(e.target.value))}
+                                    value={configRefs.current.bloomGlow}
+                                    onChange={(e) => handleSliderChange('bloomGlow', parseFloat(e.target.value))}
                                     className="w-full accent-gold-alchemical"
                                 />
                             </div>
@@ -236,12 +246,12 @@ export const OverlayUI = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] md:text-xs text-red-400/90 tracking-widest uppercase flex justify-between">
                                     <span>Geometry Limit (GPU)</span>
-                                    <span>{uiState.geometryDensity.toFixed(1)}x</span>
+                                    <span>{configRefs.current.geometryDensity.toFixed(1)}x</span>
                                 </label>
                                 <input
                                     type="range" min="0.2" max="2.0" step="0.1"
-                                    value={uiState.geometryDensity}
-                                    onChange={(e) => updateConfig('geometryDensity', parseFloat(e.target.value))}
+                                    value={configRefs.current.geometryDensity}
+                                    onChange={(e) => handleSliderChange('geometryDensity', parseFloat(e.target.value))}
                                     className="w-full accent-red-500/80"
                                 />
                             </div>
@@ -252,8 +262,8 @@ export const OverlayUI = () => {
                     <button
                         onClick={() => setShowControls(!showControls)}
                         className={`px-4 py-2 border rounded-sm backdrop-blur-md text-[10px] md:text-xs tracking-widest uppercase transition-all duration-300 w-max ${showControls
-                                ? 'bg-ethereal-blue/20 border-ethereal-blue text-white shadow-[0_0_15px_rgba(100,200,255,0.3)]'
-                                : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-ethereal-blue hover:text-white'
+                            ? 'bg-ethereal-blue/20 border-ethereal-blue text-white shadow-[0_0_15px_rgba(100,200,255,0.3)]'
+                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-ethereal-blue hover:text-white'
                             }`}
                     >
                         {showControls ? 'Close Architecture' : 'Modify Realities'}
