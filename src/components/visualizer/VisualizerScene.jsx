@@ -6,6 +6,7 @@ import React, { Suspense, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useAudio } from '../audio/AudioContext';
+import { useVisualizerConfig } from '../ui/VisualizerContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
