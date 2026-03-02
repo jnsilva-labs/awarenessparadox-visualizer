@@ -220,6 +220,8 @@ export const AudioProvider = ({ children }) => {
         let prevBrilliance = 0.001;
         let smoothedPiano = 0.001;
         let smoothedStrings = 0.001;
+        let smoothedBrass = 0.001;
+        let smoothedVoice = 0.001;
 
         const updateAudioData = () => {
             if (isPlaying && analyserRef.current && dataArrayRef.current && bandBinsRef.current) {
@@ -305,6 +307,14 @@ export const AudioProvider = ({ children }) => {
                 const rawStrings = (currentLowMid + currentHighMid) / 2.0;
                 smoothedStrings += (rawStrings - smoothedStrings) * 0.02; // 2% interpolation (very slow build)
 
+                // Brass requires a warm, moderate build prioritizing lowMids and bass warmth
+                const rawBrass = currentLowMid;
+                smoothedBrass += (rawBrass - smoothedBrass) * 0.1;
+
+                // Voice operates primarily in the upper mids/presence. Fast attack/decay.
+                const rawVoice = (currentMid + currentPresence) / 2.0;
+                smoothedVoice += (rawVoice - smoothedVoice) * 0.3;
+
                 // Mutate the ref directly. DO NOT call setState here, or React will re-render the whole app 60fps.
                 audioDataRef.current = {
                     subBass: currentSubBass,
@@ -322,7 +332,9 @@ export const AudioProvider = ({ children }) => {
                     snare: snareHit,
                     hihat: hihatHit,
                     piano: Math.max(0.001, smoothedPiano),
-                    strings: Math.max(0.001, smoothedStrings)
+                    strings: Math.max(0.001, smoothedStrings),
+                    brass: Math.max(0.001, smoothedBrass),
+                    voice: Math.max(0.001, smoothedVoice)
                 };
             }
 

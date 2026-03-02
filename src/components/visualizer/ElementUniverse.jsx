@@ -6,7 +6,14 @@ import * as THREE from 'three';
 // --- The Cinematic Color Journey ---
 // Generates a shifting base hue that slowly travels through four specific "Alchemical" colors.
 // PHASE 12: Heavily influenced by subBass drops to create instant, aggressive color palette shifts.
-const getGlobalHue = (time, audioData, offset = 0) => {
+export const getGlobalHue = (time, audioData, offset = 0, configRefs = null) => {
+    if (configRefs?.current?.theme === 'cyberpunk') {
+        // Toggle Matrix Green (0.33) and Synthwave Purple (0.75)
+        const isPurpleEvent = (time % 6.0 > 4.5) || ((Number(audioData?.bass) || 0) > 0.6);
+        return isPurpleEvent ? 0.75 : 0.33;
+    }
+    if (configRefs?.current?.theme === 'abyssal') return 0.6;
+
     // 60-second cycle for a slow, majestic color journey
     const cycleTime = 60.0;
 
@@ -80,6 +87,8 @@ const MerkabaShell = ({ audioDataRef, baseHue, configRefs }) => {
         // Flash intensely on mid/high hits
         const pulse = 1.0 + (midReactivity * 0.4);
         groupRef.current.scale.set(pulse, pulse, pulse);
+        // Physical Bounce mapping: Heavy bass/kick physically pushes the core vertically
+        groupRef.current.position.y = (Number(audioData.kick) || 0) * 0.5 + Math.sin(time * 2.0) * 0.1;
 
         const glow = 0.4 + (brilliance * 1.5);
         upTetraRef.current.material.color.setHSL((baseHue + 0.1) % 1.0, 1.0, 0.6);
@@ -126,7 +135,7 @@ const EvolvingSacredCore = ({ audioDataRef, configRefs }) => {
         const stateStyle = audioData.alchemicalState || 'sacred';
 
         // --- Alchemical State Overrides ---
-        let baseHue = getGlobalHue(time, audioDataRef.current);
+        let baseHue = getGlobalHue(time, audioDataRef.current, 0, configRefs);
         let spinSpeedMulti = 1.0;
 
         if (stateStyle === 'physical') {
@@ -294,7 +303,7 @@ const SierpinskiFractal = ({ audioDataRef, isMobile, configRefs }) => {
         groupRef.current.rotation.y = time * -0.05 + (fastHit * 0.1);
         groupRef.current.rotation.x = Math.sin(time * 0.02) * 0.2;
 
-        const baseHue = getGlobalHue(time, audioDataRef.current, 0.4);
+        const baseHue = getGlobalHue(time, audioDataRef.current, 0.4, configRefs);
         instancedRef.current.material.color.setHSL(baseHue, 1.0, 0.5);
         instancedRef.current.material.emissive.setHSL(baseHue, 1.0, 0.5);
         instancedRef.current.material.emissiveIntensity = 0.5 + fastHit * 2.0;
@@ -379,7 +388,7 @@ const FibonacciSpirals = ({ audioDataRef, isMobile, configRefs }) => {
             pointsRef.current.material.size = 0.08 + (brilliance * 0.15); // Softened
 
             // Tint the entire particle system with the evolving global hue
-            const baseHue = getGlobalHue(time, audioDataRef.current, 0.4);
+            const baseHue = getGlobalHue(time, audioDataRef.current, 0.4, configRefs);
             pointsRef.current.material.color.setHSL(baseHue, 0.8, 0.6);
         }
     });
@@ -478,7 +487,7 @@ const SacredShockwaves = ({ audioDataRef, configRefs }) => {
             }
         }
 
-        const baseHue = getGlobalHue(state.clock.elapsedTime, audioDataRef.current);
+        const baseHue = getGlobalHue(state.clock.elapsedTime, audioDataRef.current, 0, configRefs);
 
         // Update all rings
         ringStates.current.forEach((ring, i) => {
@@ -583,18 +592,19 @@ const FloatingSacredGeometry = ({ audioDataRef, isMobile, configRefs }) => {
         const audioData = audioDataRef.current;
         const subBass = Number(audioData.subBass) || 0.001;
         const highMid = Number(audioData.highMid) || 0.001;
+        const piano = Number(audioData.piano) || 0.001;
 
         // Groups rotate agonizingly slowly naturally, but jolt on specific frequencies
-        dodecaRef.current.rotation.x = time * 0.02 + (subBass * 0.1);
-        dodecaRef.current.rotation.y = time * 0.03;
+        dodecaRef.current.rotation.x = time * 0.02 + (piano * 0.2) + (subBass * 0.1);
+        dodecaRef.current.rotation.y = time * 0.03 + (piano * 0.1);
 
-        icosaRef.current.rotation.y = -time * 0.025 + (highMid * 0.1);
-        icosaRef.current.rotation.z = time * 0.015;
+        icosaRef.current.rotation.y = -time * 0.025 + (piano * 0.15) + (highMid * 0.1);
+        icosaRef.current.rotation.z = time * 0.015 + (piano * 0.1);
 
-        torusRef.current.rotation.x = time * 0.01;
+        torusRef.current.rotation.x = time * 0.01 + (piano * 0.2);
         torusRef.current.rotation.z = -time * 0.02;
 
-        const baseHue = getGlobalHue(time, audioDataRef.current, 0.7);
+        const baseHue = getGlobalHue(time, audioDataRef.current, 0.7, configRefs);
         // Pulse glow on bass
         dodecaRef.current.material.emissiveIntensity = 0.5 + (subBass * 2.0);
         dodecaRef.current.material.color.setHSL(baseHue, 0.5, 0.3);
@@ -728,21 +738,21 @@ const SacredWireframeMantles = ({ audioDataRef, isMobile, configRefs }) => {
         groupRef.current.rotation.y = time * speed;
         groupRef.current.rotation.x = time * (speed * 0.5);
 
-        const baseHue = getGlobalHue(time, audioDataRef.current, 0.4);
+        const baseHue = getGlobalHue(time, audioDataRef.current, 0.4, configRefs);
         const compHue = (baseHue + 0.5) % 1.0;
 
         // Gently pulse the wireframes - they must strictly avoid blowing out
-        const innerGlow = 0.5 + (Number(audioData.piano) || 0) * 1.2 + (Number(audioData.kick) || 0) * 1.5;
-        const outerGlow = 0.3 + (Number(audioData.piano) || 0) * 0.8 + (Number(audioData.snare) || 0) * 1.5;
+        const innerGlow = 1.0 + (Number(audioData.piano) || 0) * 1.5 + (Number(audioData.kick) || 0) * 1.5;
+        const outerGlow = 0.8 + (Number(audioData.piano) || 0) * 1.2 + (Number(audioData.snare) || 0) * 1.5;
 
         icosaRef.current.material.color.setHSL(baseHue, 1.0, 0.5);
         icosaRef.current.material.emissive.setHSL(baseHue, 1.0, 0.5);
-        icosaRef.current.material.emissiveIntensity = innerGlow * 0.3; // Very low multipliers
+        icosaRef.current.material.emissiveIntensity = innerGlow * 0.8; // Increased for geometry pop
         icosaRef.current.material.opacity = Math.min(0.5, 0.15 + (innerGlow * 0.1));
 
         tetraRef.current.material.color.setHSL(compHue, 1.0, 0.5);
         tetraRef.current.material.emissive.setHSL(compHue, 1.0, 0.5);
-        tetraRef.current.material.emissiveIntensity = outerGlow * 0.2;
+        tetraRef.current.material.emissiveIntensity = outerGlow * 0.6;
         tetraRef.current.material.opacity = Math.min(0.4, 0.1 + (outerGlow * 0.1));
 
         // Connective Lines flash violently on highs
@@ -820,7 +830,7 @@ const DriftingPadGeometries = ({ audioDataRef, isMobile, configRefs }) => {
     useFrame((state) => {
         if (!meshRef.current || !audioDataRef.current || !groupRef.current) return;
 
-        const sustain = Number(audioDataRef.current.strings) || 0;
+        const sustain = Number(audioDataRef.current.piano) || 0;
         const stateStyle = audioDataRef.current.alchemicalState || 'sacred';
         const time = state.clock.elapsedTime;
 
@@ -836,10 +846,10 @@ const DriftingPadGeometries = ({ audioDataRef, isMobile, configRefs }) => {
             spinSpeed = 0.1;
         }
 
-        groupRef.current.rotation.y = time * spinSpeed; // Slow ambient orbit around the entire scene
-        groupRef.current.rotation.x = time * (spinSpeed * 0.4);
+        groupRef.current.rotation.y = time * spinSpeed + (sustain * 0.1); // Slow ambient orbit pushed by piano chords
+        groupRef.current.rotation.x = time * (spinSpeed * 0.4) + (sustain * 0.05);
 
-        // Fade in completely from invisibility and glow massively depending solely on pads
+        // Fade in completely from invisibility and glow massively depending solely on piano pads
         const intensity = sustain * 4.0;
         meshRef.current.material.opacity = Math.min(0.7, intensity * 0.25);
         meshRef.current.material.emissiveIntensity = Math.min(3.0, intensity);
@@ -900,7 +910,7 @@ const VolumetricAudioNebula = ({ audioDataRef, isMobile, configRefs }) => {
         pointsRef.current.rotation.x = time * 0.01;
 
         // Nebular Glow Mechanics
-        let baseHue = getGlobalHue(time, audioDataRef.current, 0.5); // Offset hue for contrast
+        let baseHue = getGlobalHue(time, audioDataRef.current, 0.5, configRefs); // Offset hue for contrast
         let intensityBase = 0.5;
 
         if (stateStyle === 'physical') {
@@ -916,7 +926,7 @@ const VolumetricAudioNebula = ({ audioDataRef, isMobile, configRefs }) => {
         const swell = intensityBase + (subBass * 1.5) + (bass * 0.5);
 
         pointsRef.current.material.color.setHSL(baseHue, 1.0, 0.3); // Darker base color
-        pointsRef.current.material.opacity = Math.min(0.4, swell * 0.08); // Halved max opacity
+        pointsRef.current.material.opacity = Math.min(0.2, swell * 0.03); // Heavily reduced max opacity
         pointsRef.current.material.size = Math.min(4.0, 1.0 + (swell * 1.0)); // Slightly smaller particles
     });
 
@@ -956,12 +966,19 @@ const VoidWormhole = ({ audioDataRef, configRefs }) => {
     const ringZ = useRef(Array.from({ length: NUM_RINGS }, (_, i) => -i * 15 - 20));
 
     useFrame((state, delta) => {
-        if (!tunnelRef.current || !audioDataRef.current) return;
+        if (!tunnelRef.current || !configRefs.current || !audioDataRef.current) return;
+
+        // Hide wormhole in Abyssal theme since we replace it with the Black Hole
+        if (configRefs.current.theme === 'abyssal') {
+            tunnelRef.current.visible = false;
+            return;
+        }
+        tunnelRef.current.visible = true;
         const audioData = audioDataRef.current;
         // The tunnel hauls forward extremely aggressively on hard kicks/bass
         const speedMultiplier = 1.0 + (Number(audioData.bass) * 4.0);
 
-        const baseHue = getGlobalHue(state.clock.elapsedTime, audioDataRef.current, 0.3); // Offset pushes towards purples
+        const baseHue = getGlobalHue(state.clock.elapsedTime, audioDataRef.current, 0.3, configRefs); // Offset pushes towards purples
 
         ringZ.current.forEach((z, i) => {
             // Move forward toward the camera
@@ -1048,7 +1065,7 @@ const AlchemicalDust = ({ audioDataRef, isMobile, configRefs }) => {
 
         dustRef.current.geometry.attributes.position.needsUpdate = true;
 
-        const baseHue = getGlobalHue(time, audioDataRef.current, 0.1); // Warm gold offset
+        const baseHue = getGlobalHue(time, audioDataRef.current, 0.1, configRefs); // Warm gold offset
         dustRef.current.material.color.setHSL(baseHue, 1.0, 0.6);
         // Size pulses slightly with high-mids
         dustRef.current.material.size = 0.05 + (Number(audioData.highMid) * 0.05);
@@ -1068,7 +1085,7 @@ const AlchemicalDust = ({ audioDataRef, isMobile, configRefs }) => {
                 size={0.05}
                 sizeAttenuation
                 transparent
-                opacity={0.6}
+                opacity={0.3}
                 blending={THREE.AdditiveBlending}
                 depthWrite={false}
             />
@@ -1108,6 +1125,7 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile, configRefs }) => {
         const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current;
         const hihat = Number(audioData.hihat) || 0;
+        const brass = Number(audioData.brass) || 0; // Brass swelling
         const stateStyle = audioData.alchemicalState || 'sacred';
 
         if (configRefs.current) {
@@ -1117,14 +1135,14 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile, configRefs }) => {
             meshRef.current.count = newCount;
         }
 
-        let baseHue = getGlobalHue(time, audioDataRef.current);
+        let baseHue = getGlobalHue(time, audioDataRef.current, 0, configRefs);
 
         // Entire sphere breathes and slowly rotates
         meshRef.current.rotation.y = time * 0.05;
         meshRef.current.rotation.x = time * 0.03;
 
         // Base scale expands massive on high frequency hits (like cymbals/hihats)
-        const reactScale = 1.0 + (hihat * 1.5);
+        const reactScale = 1.0 + (hihat * 1.5) + (brass * 0.5);
         meshRef.current.scale.setScalar(reactScale);
 
         let particleScale = 0.04;
@@ -1135,7 +1153,7 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile, configRefs }) => {
 
             // Introduce a rolling wave through the lattice based on index and time
             const wave = Math.sin((i * 0.1) - (time * 2.0)) * 0.5 + 0.5;
-            const dynamicRadius = 18 + (wave * 2.0) + (hihat * 5.0);
+            const dynamicRadius = 18 + (wave * 2.0) + (hihat * 2.0) + (brass * 15.0);
 
             dummy.position.copy(p).multiplyScalar(dynamicRadius);
 
@@ -1190,7 +1208,7 @@ const InteractiveCursorRipple = ({ audioDataRef, configRefs }) => {
 
         const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current; // Phase 12 needed for getGlobalHue signature
-        const baseHue = getGlobalHue(time, audioData, 0.5);
+        const baseHue = getGlobalHue(time, audioData, 0.5, configRefs);
 
         // Apply interactive Geometry Density limit without remounting arrays
         if (configRefs.current) {
@@ -1257,7 +1275,7 @@ const MassiveVoidKnots = ({ audioDataRef, isMobile, configRefs }) => {
         const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current;
         const strings = Number(audioData.strings) || 0;
-        const baseHue = getGlobalHue(time, audioDataRef.current);
+        const baseHue = getGlobalHue(time, audioDataRef.current, 0, configRefs);
 
         knots.forEach((knot, i) => {
             // Drift slowly forward and reset
@@ -1299,12 +1317,67 @@ const MassiveVoidKnots = ({ audioDataRef, isMobile, configRefs }) => {
     );
 };
 
+
+
+// 14. Abyssal Singularity (Abyssal Exclusive)
+const AbyssalSingularity = ({ audioDataRef, configRefs }) => {
+    const groupRef = useRef();
+    const auroraRef = useRef();
+    const accretionRef = useRef();
+
+    useFrame((state) => {
+        if (!configRefs.current || !groupRef.current || !audioDataRef.current) return;
+        if (configRefs.current.theme !== 'abyssal') {
+            groupRef.current.visible = false;
+            return;
+        }
+        groupRef.current.visible = true;
+
+        const time = state.clock.elapsedTime;
+        const audioData = audioDataRef.current;
+        const subBass = Number(audioData.subBass) || 0;
+        const strings = Number(audioData.strings) || 0;
+
+        if (accretionRef.current) {
+            accretionRef.current.rotation.z = time * 0.5 + (subBass * 0.5);
+            accretionRef.current.scale.setScalar(1.0 + (subBass * 0.4));
+            accretionRef.current.material.opacity = 0.5 + (subBass * 0.5);
+        }
+
+        if (auroraRef.current) {
+            auroraRef.current.rotation.z = -time * 0.2;
+            auroraRef.current.scale.setScalar(1.0 + (strings * 0.6));
+            auroraRef.current.material.opacity = 0.3 + (strings * 0.5);
+        }
+    });
+
+    return (
+        <group ref={groupRef} position={[0, 0, -15]}>
+            <mesh position={[0, 0, 0.1]}>
+                <circleGeometry args={[5, 64]} />
+                <meshBasicMaterial color="#000000" depthWrite={true} />
+            </mesh>
+            <mesh ref={accretionRef} position={[0, 0, 0]}>
+                <ringGeometry args={[5.2, 8, 64]} />
+                <meshBasicMaterial color="#ffffff" transparent opacity={0.5} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+            </mesh>
+            <mesh ref={auroraRef} position={[0, 0, -0.1]}>
+                <ringGeometry args={[7, 25, 64]} />
+                <meshBasicMaterial color="#888888" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} side={THREE.DoubleSide} />
+            </mesh>
+        </group>
+    );
+};
+
 export const ElementUniverse = ({ audioDataRef, isMobile, configRefs }) => {
     return (
         <group>
             {/* Background / Environment Layers */}
             <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
-            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            {configRefs.current?.theme !== 'abyssal' && (
+                <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            )}
+            <AbyssalSingularity audioDataRef={audioDataRef} configRefs={configRefs} />
 
             {/* The proven stable components */}
             <EvolvingSacredCore audioDataRef={audioDataRef} configRefs={configRefs} />
