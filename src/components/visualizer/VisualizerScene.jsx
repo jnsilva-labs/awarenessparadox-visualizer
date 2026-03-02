@@ -333,12 +333,17 @@ const SacredSigilFlashes = ({ audioDataRef, configRefs }) => {
             const currentCyberOpacity = parseFloat(cyberEl.style.opacity || 0);
 
             if (index === targetIndex && !isAbyssal) {
-                // 3D CSS Projection Math
-                const timeStr = Math.floor(Date.now() / 500).toString();
-                const rotX = (Number(timeStr.slice(-1)) - 5) * 8; // -40deg to +40deg
-                const rotY = (Number(timeStr.slice(-2, -1)) - 5) * 8;
-                const scale = 1.0 + (subBass * 0.4) - (brilliance * 0.2);
-                const transformStr = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+                // Extreme 3D CSS Projection Math
+                const timeStr = Math.floor(Date.now() / 100).toString();
+                // Sweep continuously
+                const rotX = (Number(timeStr.slice(-2)) - 50) * 0.8;
+                const rotY = (Number(timeStr.slice(-3, -1)) - 50) * 0.8;
+                const rotZ = subBass * 45; // Spin on bass
+                const kickBase = Number(audioData.kick) || 0;
+                const zPop = subBass * 300 + kickBase * 100; // Physically punch out towards camera
+                const scale = 1.0 + (subBass * 0.6) + (kickBase * 0.2) - (brilliance * 0.2);
+
+                const transformStr = `perspective(1000px) translateZ(${zPop}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${scale})`;
 
                 if (isCyber) {
                     el.style.opacity = '0';
@@ -349,17 +354,34 @@ const SacredSigilFlashes = ({ audioDataRef, configRefs }) => {
                     let str = '';
                     for (let i = 0; i < 16; i++) str += chars[Math.floor(Math.random() * chars.length)];
                     // Add line breaks
-                    cyberEl.innerText = str.slice(0, 4) + '\\n' + str.slice(4, 8) + '\\n' + str.slice(8, 12) + '\\n' + str.slice(12, 16);
+                    cyberEl.innerText = str.slice(0, 4) + '\n' + str.slice(4, 8) + '\n' + str.slice(8, 12) + '\n' + str.slice(12, 16);
 
                     cyberEl.style.transform = transformStr;
                 } else {
                     cyberEl.style.opacity = '0';
                     el.style.opacity = '0.85';
-                    // Apply dynamic colored drop-shadow, or strict monochrome for abyssal
+                    // Apply dynamic solid color and deep drop-shadows
                     const hueDeg = Math.floor(baseHue * 360);
-                    el.style.filter = isAbyssal ? 'drop-shadow(0 0 20px rgba(255,255,255,0.8)) grayscale(100%)' : `drop-shadow(0 0 30px hsl(${hueDeg}, 100%, 50%))`;
+                    // Color the physical SVG shape via background-color (CSS Mask)
+                    el.style.backgroundColor = `hsl(${hueDeg}, 100%, 65%)`;
+                    // Double up the drop shadow for glow
+                    el.style.filter = `drop-shadow(0 0 30px hsl(${hueDeg}, 100%, 50%)) drop-shadow(0 0 60px hsl(${hueDeg}, 100%, 30%))`;
                     el.style.transform = transformStr;
                 }
+            } else if (index === targetIndex && isAbyssal) {
+                // Abyssal gets its own forced grayscale pass with depth
+                const timeStr = Math.floor(Date.now() / 100).toString();
+                const rotX = (Number(timeStr.slice(-2)) - 50) * 0.8;
+                const rotY = (Number(timeStr.slice(-3, -1)) - 50) * 0.8;
+                const zPop = subBass * 300;
+                const scale = 1.0 + (subBass * 0.5);
+                const transformStr = `perspective(1000px) translateZ(${zPop}px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+
+                cyberEl.style.opacity = '0';
+                el.style.opacity = '0.85';
+                el.style.backgroundColor = 'white'; // Solid white
+                el.style.filter = 'drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 50px rgba(255,255,255,0.4))';
+                el.style.transform = transformStr;
             } else {
                 // Phase 12: Omnipresent Mandalas fade extremely slowly and never truly vanish
                 el.style.opacity = isCyber || isAbyssal ? '0' : Math.max(0.2, currentOpacity - 0.015).toString();
@@ -371,58 +393,64 @@ const SacredSigilFlashes = ({ audioDataRef, configRefs }) => {
     return (
         <>
             <Html center zIndexRange={[100, 0]} className="pointer-events-none mix-blend-screen opacity-100">
-                <div className="relative w-[1000px] h-[1000px] flex items-center justify-center perspective-[1000px]">
-                    <img
+                <div className="relative w-[1000px] h-[1000px] flex items-center justify-center perspective-[1000px] overflow-visible">
+                    <div
                         ref={metatronRef}
-                        src="/assets/sigils/metatron.svg"
-                        alt="Metatron's Cube"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/metatron.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber1Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-bold text-6xl text-green-500 text-center leading-none whitespace-pre drop-shadow-[0_0_15px_rgba(0,255,0,1)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
 
-                    <img
+                    <div
                         ref={seedRef}
-                        src="/assets/sigils/seed_of_life.svg"
-                        alt="Seed of Life"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/seed_of_life.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber2Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-bold text-8xl text-green-400 text-center leading-none whitespace-pre drop-shadow-[0_0_25px_rgba(0,255,0,0.8)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
 
-                    <img
+                    <div
                         ref={merkabaRef}
-                        src="/assets/sigils/merkaba.svg"
-                        alt="Merkaba"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/merkaba.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber3Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-black text-9xl text-green-300 text-center leading-none whitespace-pre drop-shadow-[0_0_35px_rgba(0,255,0,1)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
 
-                    <img
+                    <div
                         ref={vectorRef}
-                        src="/assets/sigils/vector_equilibrium.svg"
-                        alt="Vector Equilibrium"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/vector_equilibrium.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber4Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-bold text-7xl text-green-500 text-center leading-none whitespace-pre drop-shadow-[0_0_20px_rgba(0,255,0,0.9)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
 
-                    <img
+                    <div
                         ref={sriRef}
-                        src="/assets/sigils/sri_yantra.svg"
-                        alt="Sri Yantra"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/sri_yantra.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber5Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-black text-[10rem] text-[#00ff44] text-center leading-none whitespace-pre drop-shadow-[0_0_40px_rgba(0,255,0,1)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
 
-                    <img
+                    <div
                         ref={flowerRef}
-                        src="/assets/sigils/flower_of_life.svg"
-                        alt="Flower of Life"
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
-                        style={{ opacity: 0, transition: 'transform 0.05s ease-out' }}
+                        className="absolute inset-x-0 inset-y-0 w-full h-full will-change-transform"
+                        style={{
+                            opacity: 0, transition: 'transform 0.05s ease-out, opacity 0.1s ease-out', backgroundColor: 'white',
+                            WebkitMaskImage: 'url(/assets/sigils/flower_of_life.svg)', WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center'
+                        }}
                     />
                     <div ref={cyber6Ref} className="absolute inset-0 w-full h-full flex items-center justify-center font-mono font-bold text-[8rem] text-green-500 text-center leading-none whitespace-pre drop-shadow-[0_0_20px_rgba(0,255,0,0.8)] will-change-transform" style={{ opacity: 0, transition: 'transform 0.05s ease-out' }} />
                 </div>

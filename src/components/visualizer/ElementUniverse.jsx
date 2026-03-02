@@ -30,9 +30,9 @@ export const getGlobalHue = (time, audioData, offset = 0, configRefs = null) => 
     // The Sacred Palette
     // 0.75 = Mystic Purple
     // 0.90 = Alchemical Magenta
-    // 0.50 = Ethereal Teal / Cyan
-    // 0.12 = Sacred Gold / Brass
-    const stops = [0.75, 0.90, 0.50, 0.12];
+    // 0.65 = Celestial Blue
+    // 0.05 = Solar Amber
+    const stops = [0.75, 0.90, 0.65, 0.05];
 
     const segment = progress * stops.length;
     const index = Math.floor(segment);
@@ -58,7 +58,18 @@ export const getGlobalHue = (time, audioData, offset = 0, configRefs = null) => 
     }
 
     // Apply steady offset + violent bass warp
-    return (lerpedHue + offset + bassColorWarp) % 1.0;
+    let finalHue = (lerpedHue + offset + bassColorWarp) % 1.0;
+    if (finalHue < 0) finalHue += 1.0;
+
+    // Purge the Cyberpunk Green and Cyan spectrum (0.22 to 0.55) entirely from the Sacred Alchemy theme
+    if (configRefs?.current?.theme !== 'cyberpunk' && configRefs?.current?.theme !== 'abyssal') {
+        if (finalHue > 0.22 && finalHue < 0.55) {
+            // Push it forcefully out of the green zone into Gold/Amber (0.15) or Celestial Blue (0.60)
+            finalHue = finalHue < 0.38 ? 0.15 : 0.60;
+        }
+    }
+
+    return finalHue;
 };
 
 // --- Phase 13: The 3D Merkaba (Star Tetrahedron) ---
@@ -540,6 +551,7 @@ const SacredShockwaves = ({ audioDataRef, configRefs }) => {
 
 // 5. Floating Geometries (Background Environment)
 const FloatingSacredGeometry = ({ audioDataRef, isMobile, configRefs }) => {
+    const groupRef = useRef();
     const dodecaRef = useRef();
     const icosaRef = useRef();
     const torusRef = useRef();
@@ -586,13 +598,18 @@ const FloatingSacredGeometry = ({ audioDataRef, isMobile, configRefs }) => {
     }, [dummy, positions, rotations, scales]);
 
     useFrame((state) => {
-        if (!dodecaRef.current || !icosaRef.current || !torusRef.current || !audioDataRef.current) return;
+        if (!groupRef.current || !dodecaRef.current || !icosaRef.current || !torusRef.current || !audioDataRef.current) return;
 
         const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current;
         const subBass = Number(audioData.subBass) || 0.001;
+        const kick = Number(audioData.kick) || 0.001;
         const highMid = Number(audioData.highMid) || 0.001;
         const piano = Number(audioData.piano) || 0.001;
+
+        // Massive group scale on heavy bass
+        const targetScale = 1.0 + (subBass * 0.8) + (kick * 0.4);
+        groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
 
         // Groups rotate agonizingly slowly naturally, but jolt on specific frequencies
         dodecaRef.current.rotation.x = time * 0.02 + (piano * 0.2) + (subBass * 0.1);
@@ -602,28 +619,36 @@ const FloatingSacredGeometry = ({ audioDataRef, isMobile, configRefs }) => {
         icosaRef.current.rotation.z = time * 0.015 + (piano * 0.1);
 
         torusRef.current.rotation.x = time * 0.01 + (piano * 0.2);
-        torusRef.current.rotation.z = -time * 0.02;
+        torusRef.current.rotation.z = -time * 0.02 + (kick * 0.2);
 
         const baseHue = getGlobalHue(time, audioDataRef.current, 0.7, configRefs);
         // Pulse glow on bass
-        dodecaRef.current.material.emissiveIntensity = 0.5 + (subBass * 2.0);
-        dodecaRef.current.material.color.setHSL(baseHue, 0.5, 0.3);
-        dodecaRef.current.material.emissive.setHSL(baseHue, 0.5, 0.3);
+        dodecaRef.current.material.emissiveIntensity = 0.5 + (subBass * 3.0);
+        dodecaRef.current.material.color.setHSL(baseHue, 0.8, 0.5);
+        dodecaRef.current.material.emissive.setHSL(baseHue, 0.8, 0.5);
+
+        icosaRef.current.material.emissiveIntensity = 0.2 + (highMid * 2.0);
+        icosaRef.current.material.color.setHSL((baseHue + 0.3) % 1.0, 0.8, 0.5);
+        icosaRef.current.material.emissive.setHSL((baseHue + 0.3) % 1.0, 0.8, 0.5);
+
+        torusRef.current.material.emissiveIntensity = 0.2 + (kick * 2.0);
+        torusRef.current.material.color.setHSL((baseHue + 0.6) % 1.0, 0.8, 0.5);
+        torusRef.current.material.emissive.setHSL((baseHue + 0.6) % 1.0, 0.8, 0.5);
     });
 
     return (
-        <group>
+        <group ref={groupRef}>
             <instancedMesh ref={dodecaRef} args={[null, null, Math.ceil(NUM_SOLIDS / 3)]}>
                 <dodecahedronGeometry args={[2, 0]} />
                 <meshStandardMaterial wireframe emissiveIntensity={1.0} transparent opacity={0.3} blending={THREE.AdditiveBlending} />
             </instancedMesh>
             <instancedMesh ref={icosaRef} args={[null, null, Math.ceil(NUM_SOLIDS / 3)]}>
                 <icosahedronGeometry args={[1.5, 0]} />
-                <meshStandardMaterial wireframe color="cyan" transparent opacity={0.2} blending={THREE.AdditiveBlending} />
+                <meshStandardMaterial wireframe transparent opacity={0.2} blending={THREE.AdditiveBlending} />
             </instancedMesh>
             <instancedMesh ref={torusRef} args={[null, null, Math.ceil(NUM_SOLIDS / 3)]}>
                 <torusGeometry args={[1.5, 0.4, 8, 24]} />
-                <meshStandardMaterial wireframe color="magenta" transparent opacity={0.15} blending={THREE.AdditiveBlending} />
+                <meshStandardMaterial wireframe transparent opacity={0.15} blending={THREE.AdditiveBlending} />
             </instancedMesh>
         </group>
     );
@@ -737,6 +762,10 @@ const SacredWireframeMantles = ({ audioDataRef, isMobile, configRefs }) => {
 
         groupRef.current.rotation.y = time * speed;
         groupRef.current.rotation.x = time * (speed * 0.5);
+
+        // Massive group scale on heavy bass
+        const targetScale = 1.0 + (subBass * 0.6) + (Number(audioData.kick) || 0) * 0.4;
+        groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
 
         const baseHue = getGlobalHue(time, audioDataRef.current, 0.4, configRefs);
         const compHue = (baseHue + 0.5) % 1.0;
