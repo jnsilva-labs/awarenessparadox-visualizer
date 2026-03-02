@@ -228,13 +228,13 @@ const EvolvingSacredCore = ({ audioDataRef }) => {
 };
 
 // 1.5 Sierpinski Triangle Fractal
-const SierpinskiFractal = ({ audioDataRef }) => {
+const SierpinskiFractal = ({ audioDataRef, isMobile }) => {
     const instancedRef = useRef();
     const groupRef = useRef();
-    const DEPTH = 5; // 1024 tetrahedrons, excellent density without crashing
+    const DEPTH = isMobile ? 4 : 5; // 256 tetrahedrons on mobile vs 1024 on desktop
     const RADIUS = 15;
     const NUM_INSTANCES = Math.pow(4, DEPTH);
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     const centers = useMemo(() => {
         const pts = [];
@@ -313,12 +313,12 @@ const SierpinskiFractal = ({ audioDataRef }) => {
 };
 
 // 2. Fibonacci Particle System (Highs & Percussion)
-const FibonacciSpirals = ({ audioDataRef }) => {
+const FibonacciSpirals = ({ audioDataRef, isMobile }) => {
     const pointsRef = useRef();
 
-    // 10,000 points spanning deep massive space
+    // 10,000 points on desktop, 3,000 on mobile
     const { positions, colors } = useMemo(() => {
-        const count = 10000;
+        const count = isMobile ? 3000 : 10000;
         const pos = new Float32Array(count * 3);
         const col = new Float32Array(count * 3);
 
@@ -530,13 +530,13 @@ const SacredShockwaves = ({ audioDataRef }) => {
 };
 
 // 5. Floating Geometries (Background Environment)
-const FloatingSacredGeometry = ({ audioDataRef }) => {
+const FloatingSacredGeometry = ({ audioDataRef, isMobile }) => {
     const dodecaRef = useRef();
     const icosaRef = useRef();
     const torusRef = useRef();
 
-    const NUM_SOLIDS = 40;
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const NUM_SOLIDS = isMobile ? 12 : 40;
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     // Randomize initial positions in a massive sphere around the local origin
     const { positions, rotations, scales } = useMemo(() => {
@@ -620,15 +620,15 @@ const FloatingSacredGeometry = ({ audioDataRef }) => {
 };
 
 // 5.5 Sacred Mantles (Phase 11: The Secret Geometry World)
-const SacredWireframeMantles = ({ audioDataRef }) => {
+const SacredWireframeMantles = ({ audioDataRef, isMobile }) => {
     const groupRef = useRef();
     const icosaRef = useRef();
     const tetraRef = useRef();
     const scaffoldLinesRef = useRef();
 
-    // 300 total geometries forming a dense 3D wireframe shell
-    const NUM_GEOMETRIES = 120;
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    // 120 geometries forming a dense 3D wireframe shell
+    const NUM_GEOMETRIES = isMobile ? 40 : 120;
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     // Form dense concentric shells around the core
     const { icosaPositions, icosaRotations, tetraPositions, tetraRotations, scaffoldLineGeometry } = useMemo(() => {
@@ -772,12 +772,12 @@ const SacredWireframeMantles = ({ audioDataRef }) => {
 };
 
 // 6. Brass & Pads Frames (Drifting peripheral sacred geometry reacting to sustained chords)
-const DriftingPadGeometries = ({ audioDataRef }) => {
+const DriftingPadGeometries = ({ audioDataRef, isMobile }) => {
     const groupRef = useRef();
     const meshRef = useRef();
 
-    const NUM_GEOMETRIES = 60;
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const NUM_GEOMETRIES = isMobile ? 15 : 60;
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     // Scatter completely away from the center core
     const { positions, rotations, scales } = useMemo(() => {
@@ -857,10 +857,10 @@ const DriftingPadGeometries = ({ audioDataRef }) => {
 };
 
 // 7. Volumetric Audio Nebula (Phase 8: Dense interactive background dust)
-const VolumetricAudioNebula = ({ audioDataRef }) => {
+const VolumetricAudioNebula = ({ audioDataRef, isMobile }) => {
     const pointsRef = useRef();
 
-    const PARTICLES = 8000;
+    const PARTICLES = isMobile ? 2000 : 8000;
 
     // Distribute particles in a massive spherical shell, leaving the center hollow
     const positions = useMemo(() => {
@@ -991,9 +991,9 @@ const VoidWormhole = ({ audioDataRef }) => {
 };
 
 // 9. Alchemical Dust (Massive atmospheric foreground particles)
-const AlchemicalDust = ({ audioDataRef }) => {
+const AlchemicalDust = ({ audioDataRef, isMobile }) => {
     const dustRef = useRef();
-    const NUM_PARTICLES = 2500;
+    const NUM_PARTICLES = isMobile ? 800 : 2500;
 
     const { positions, randomFactors } = useMemo(() => {
         const pos = new Float32Array(NUM_PARTICLES * 3);
@@ -1064,10 +1064,10 @@ const AlchemicalDust = ({ audioDataRef }) => {
 
 // 7. Golden Ratio Lattice (Phase 13: 3D Phyllotaxis)
 // Replaces the flat spirals with a dense spherical lattice mapped via the Golden Angle
-const GoldenRatioLattice = ({ audioDataRef }) => {
+const GoldenRatioLattice = ({ audioDataRef, isMobile }) => {
     const meshRef = useRef();
-    const NUM_PARTICLES = 300;
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const NUM_PARTICLES = isMobile ? 120 : 300;
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     // Pre-calculate the spherical phyllotaxis positions
     const points = useMemo(() => {
@@ -1201,10 +1201,10 @@ const InteractiveCursorRipple = ({ audioDataRef }) => {
 
 // --- Phase 13: Torus Knot Energy Fields ---
 // Massive, intricate sacred knots slowly navigating the deep void
-const MassiveVoidKnots = ({ audioDataRef }) => {
+const MassiveVoidKnots = ({ audioDataRef, isMobile }) => {
     const meshRef = useRef();
-    const NUM_KNOTS = 12; // 12 massive knots
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const NUM_KNOTS = isMobile ? 4 : 12; // 12 massive knots on desktop, 4 on mobile
+    const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
 
     const knots = useMemo(() => {
         return Array.from({ length: NUM_KNOTS }).map(() => ({
@@ -1271,31 +1271,31 @@ const MassiveVoidKnots = ({ audioDataRef }) => {
     );
 };
 
-export const ElementUniverse = ({ audioDataRef }) => {
+export const ElementUniverse = ({ audioDataRef, isMobile }) => {
     return (
         <group>
             {/* Background / Environment Layers */}
-            <VolumetricAudioNebula audioDataRef={audioDataRef} />
-            <VoidWormhole audioDataRef={audioDataRef} />
+            <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} />
+            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} />
 
             {/* The proven stable components */}
             <EvolvingSacredCore audioDataRef={audioDataRef} />
 
             {/* Phase 11: The Sacred Mantle of wireframes wrapping the core */}
-            <SacredWireframeMantles audioDataRef={audioDataRef} />
+            <SacredWireframeMantles audioDataRef={audioDataRef} isMobile={isMobile} />
 
             <InteractiveCursorRipple audioDataRef={audioDataRef} />
-            <FibonacciSpirals audioDataRef={audioDataRef} />
+            <FibonacciSpirals audioDataRef={audioDataRef} isMobile={isMobile} />
             {/* Phase 13: Upgraded to GoldenRatioLattice */}
-            <GoldenRatioLattice audioDataRef={audioDataRef} />
+            <GoldenRatioLattice audioDataRef={audioDataRef} isMobile={isMobile} />
             <LightningFlashes audioDataRef={audioDataRef} />
             <SacredShockwaves audioDataRef={audioDataRef} />
             {/* Phase 13: Massive Torus Knots */}
-            <MassiveVoidKnots audioDataRef={audioDataRef} />
-            <FloatingSacredGeometry audioDataRef={audioDataRef} />
+            <MassiveVoidKnots audioDataRef={audioDataRef} isMobile={isMobile} />
+            <FloatingSacredGeometry audioDataRef={audioDataRef} isMobile={isMobile} />
 
-            <DriftingPadGeometries audioDataRef={audioDataRef} />
-            <AlchemicalDust audioDataRef={audioDataRef} />
+            <DriftingPadGeometries audioDataRef={audioDataRef} isMobile={isMobile} />
+            <AlchemicalDust audioDataRef={audioDataRef} isMobile={isMobile} />
 
             {/* Ambient Background Glow Layer */}
             <mesh position={[0, 0, -50]}>

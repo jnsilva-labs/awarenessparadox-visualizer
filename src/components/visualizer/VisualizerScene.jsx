@@ -9,7 +9,7 @@ import { useAudio } from '../audio/AudioContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
-const AudioReactiveEffects = ({ audioDataRef }) => {
+const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
     const bloomRef = useRef();
     const caRef = useRef();
     const glitchRef = useRef();
@@ -125,8 +125,10 @@ const AudioReactiveEffects = ({ audioDataRef }) => {
                 active // The active prop must be true for our manual mode/factor overrides to be processed by the render loop
             />
 
-            {/* The Chromatic Aberration effect sitting ready to be shocked */}
-            <ChromaticAberration ref={caRef} offset={[0, 0]} radialModulation={false} modulationOffset={0.0} />
+            {/* The Chromatic Aberration effect sitting ready to be shocked (Disabled on Mobile for Performance) */}
+            {!isMobile && (
+                <ChromaticAberration ref={caRef} offset={[0, 0]} radialModulation={false} modulationOffset={0.0} />
+            )}
             <Noise opacity={0.03} blendFunction={BlendFunction.SOFT_LIGHT} />
             <Vignette eskil={false} offset={0.3} darkness={0.8} blendFunction={BlendFunction.NORMAL} />
         </EffectComposer>
@@ -389,25 +391,25 @@ const SentientCinematicDirector = ({ audioDataRef }) => {
 // Isolate the Canvas from the AudioProvider context re-renders.
 // EffectComposer is notoriously buggy when forced to re-render dynamically, 
 // causing "circular JSON" DevTools/HMR crashes when it tries to remount passes.
-const VisualizerCanvas = React.memo(({ audioDataRef }) => {
+const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
     return (
         <Canvas
             shadows={false}
             camera={{ position: [0, 0, 12], near: 0.1, far: 1000 }}
             // Extremely important for post-processing and performance
             gl={{ powerPreference: "high-performance", antialias: false, stencil: false, depth: true }}
-            dpr={[1, 2]} // Support retina displays up to 2x definition
+            dpr={isMobile ? [1, 1] : [1, 2]} // Disable retina resolutions completely on mobile to prevent GPU thermal throttling
         >
             <color attach="background" args={['#000000']} />
 
             <Suspense fallback={null}>
                 {/* The Universe Elements */}
-                <ElementUniverse audioDataRef={audioDataRef} />
+                <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} />
 
                 {/* Elite Reactive Rendering */}
-                <AudioReactiveEffects audioDataRef={audioDataRef} />
+                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} />
                 <KinematicCameraShake audioDataRef={audioDataRef} />
-                <SacredSigilFlashes audioDataRef={audioDataRef} />
+                <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} />
                 <SentientCinematicDirector audioDataRef={audioDataRef} />
             </Suspense>
         </Canvas>
@@ -416,10 +418,19 @@ const VisualizerCanvas = React.memo(({ audioDataRef }) => {
 
 export const VisualizerScene = () => {
     const { audioDataRef } = useAudio();
+    // A stable, lightweight check for mobile screen sizes
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     return (
         <div className="absolute inset-0 w-full h-full z-0">
-            <VisualizerCanvas audioDataRef={audioDataRef} />
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} />
         </div>
     );
 };

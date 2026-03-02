@@ -114,7 +114,7 @@ export const OverlayUI = () => {
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        accept="audio/*"
+                        accept="audio/*,audio/mpeg,.mp3,.wav,.m4a"
                         className="hidden"
                     />
 
@@ -167,9 +167,7 @@ export const OverlayUI = () => {
                         ? (isMicActive ? 'Listening to Environment // Quantum Field Engaged' : 'File Sync Active // Quantum Field Engaged')
                         : 'Awaiting Resonance'}
                 </p>
-                <p className="text-xs text-white/30 tracking-widest uppercase">
-                    JN Silva
-                </p>
+                {/* Name removed for clean presentation */}
             </footer>
             {/* Global Error Overlay */}
             {debugLogs.length > 0 && (
