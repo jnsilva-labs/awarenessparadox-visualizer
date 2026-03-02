@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-150 -150 300 300" stroke="#FFFFFF" fill="none" stroke-width="0.5">
+  <g opacity="0.8">
+    <!-- Center Dot (Bindu) -->
+    <circle cx="0" cy="0" r="2" fill="#FFFFFF" />
+
+    <!-- Sri Yantra Approximated Triangles -->
+    
+    <!-- 4 Upward Pointing Triangles (Shiva) -->
+    <!-- T1 (Largest Up) -->
+    <polygon points="0,-80 70,30 -70,30" />
+    <!-- T2 -->
+    <polygon points="0,-50 55,20 -55,20" />
+    <!-- T3 -->
+    <polygon points="0,-25 40,15 -40,15" />
+    <!-- T4 (Smallest Up) -->
+    <polygon points="0,-10 25,10 -25,10" />
+
+    <!-- 5 Downward Pointing Triangles (Shakti) -->
+    <!-- T1 (Largest Down) -->
+    <polygon points="0,90 85,-20 -85,-20" />
+    <!-- T2 -->
+    <polygon points="0,60 70,-10 -70,-10" />
+    <!-- T3 -->
+    <polygon points="0,40 50,0 -50,0" />
+    <!-- T4 -->
+    <polygon points="0,20 35,-5 -35,-5" />
+    <!-- T5 (Smallest Down, intersects Bindu) -->
+    <polygon points="0,5 20,-15 -20,-15" />
+    
+    <!-- Inner Lotus (8 Petals approximated by arcs) -->
+    <circle cx="0" cy="0" r="45" stroke-width="0.2" opacity="0.5" />
+    
+    <!-- Outer Lotus (16 Petals approximated by arcs) -->
+    <circle cx="0" cy="0" r="70" stroke-width="0.3" opacity="0.6" />
+    
+    <!-- Bhupura (Earth Square) - The outer boundary -->
+    <!-- Inner Square -->
+    <rect x="-95" y="-95" width="190" height="190" stroke-width="0.6" />
+    
+    <!-- Outer Square -->
+    <rect x="-105" y="-105" width="210" height="210" stroke-width="0.6" />
+    
+    <!-- Gates (T-Shapes on 4 sides) -->
+    <!-- Top Gate -->
+    <polyline points="-20,-105 -20,-120 20,-120 20,-105" />
+    <polyline points="-10,-95 -10,-110 10,-110 10,-95" />
+    
+    <!-- Bottom Gate -->
+    <polyline points="-20,105 -20,120 20,120 20,105" />
+    <polyline points="-10,95 -10,110 10,110 10,95" />
+    
+    <!-- Left Gate -->
+    <polyline points="-105,-20 -120,-20 -120,20 -105,20" />
+    <polyline points="-95,-10 -110,-10 -110,10 -95,10" />
+    
+    <!-- Right Gate -->
+    <polyline points="105,-20 120,-20 120,20 105,20" />
+    <polyline points="95,-10 110,-10 110,10 95,10" />
+
+  </g>
+</svg>

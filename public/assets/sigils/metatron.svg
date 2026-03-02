@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -120 240 240" stroke="#FFFFFF" fill="none" stroke-width="0.5">
+  <defs>
+    <!-- Basic circle for the 13 spheres -->
+    <circle id="node" cx="0" cy="0" r="16" />
+  </defs>
+
+  <g opacity="0.8">
+    <!-- The 13 nodes of Metatron's Cube -->
+    <!-- Center -->
+    <use href="#node" x="0" y="0" />
+    
+    <!-- Inner Hexagon (Distance R) -->
+    <use href="#node" x="0" y="-45" />
+    <use href="#node" x="38.97" y="-22.5" />
+    <use href="#node" x="38.97" y="22.5" />
+    <use href="#node" x="0" y="45" />
+    <use href="#node" x="-38.97" y="22.5" />
+    <use href="#node" x="-38.97" y="-22.5" />
+
+    <!-- Outer Hexagon (Distance 2R) -->
+    <use href="#node" x="0" y="-90" />
+    <use href="#node" x="77.94" y="-45" />
+    <use href="#node" x="77.94" y="45" />
+    <use href="#node" x="0" y="90" />
+    <use href="#node" x="-77.94" y="45" />
+    <use href="#node" x="-77.94" y="-45" />
+  </g>
+
+  <!-- Connection Lines (Connecting every node to every other node) -->
+  <g opacity="0.5" stroke-width="0.2">
+    <!-- Center to Inner -->
+    <line x1="0" y1="0" x2="0" y2="-45" />
+    <line x1="0" y1="0" x2="38.97" y2="-22.5" />
+    <line x1="0" y1="0" x2="38.97" y2="22.5" />
+    <line x1="0" y1="0" x2="0" y2="45" />
+    <line x1="0" y1="0" x2="-38.97" y2="22.5" />
+    <line x1="0" y1="0" x2="-38.97" y2="-22.5" />
+    
+    <!-- Inner to Outer (Straight out) -->
+    <line x1="0" y1="-45" x2="0" y2="-90" />
+    <line x1="38.97" y1="-22.5" x2="77.94" y2="-45" />
+    <line x1="38.97" y1="22.5" x2="77.94" y2="45" />
+    <line x1="0" y1="45" x2="0" y2="90" />
+    <line x1="-38.97" y1="22.5" x2="-77.94" y2="45" />
+    <line x1="-38.97" y1="-22.5" x2="-77.94" y2="-45" />
+
+    <!-- Inner Hexagon Perimeter -->
+    <line x1="0" y1="-45" x2="38.97" y2="-22.5" />
+    <line x1="38.97" y1="-22.5" x2="38.97" y2="22.5" />
+    <line x1="38.97" y1="22.5" x2="0" y2="45" />
+    <line x1="0" y1="45" x2="-38.97" y2="22.5" />
+    <line x1="-38.97" y1="22.5" x2="-38.97" y2="-22.5" />
+    <line x1="-38.97" y1="-22.5" x2="0" y2="-45" />
+
+    <!-- Outer Hexagon Perimeter -->
+    <line x1="0" y1="-90" x2="77.94" y2="-45" />
+    <line x1="77.94" y1="-45" x2="77.94" y2="45" />
+    <line x1="77.94" y1="45" x2="0" y2="90" />
+    <line x1="0" y1="90" x2="-77.94" y2="45" />
+    <line x1="-77.94" y1="45" x2="-77.94" y2="-45" />
+    <line x1="-77.94" y1="-45" x2="0" y2="-90" />
+    
+    <!-- Outer Star (Tetrahedrons) -->
+    <line x1="0" y1="-90" x2="77.94" y2="45" />
+    <line x1="77.94" y1="45" x2="-77.94" y2="45" />
+    <line x1="-77.94" y1="45" x2="0" y2="-90" />
+
+    <line x1="0" y1="90" x2="77.94" y2="-45" />
+    <line x1="77.94" y1="-45" x2="-77.94" y2="-45" />
+    <line x1="-77.94" y1="-45" x2="0" y2="90" />
+  </g>
+</svg>

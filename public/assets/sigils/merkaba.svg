@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -120 240 240" stroke="#FFFFFF" fill="none" stroke-width="0.5">
+  <g opacity="0.8">
+    <!-- Star of David / Merkaba (Two intersecting tetrahedrons in 2D projection) -->
+    <!-- Upward Triangle -->
+    <polygon points="0,-80 69.28,40 -69.28,40" />
+    
+    <!-- Downward Triangle -->
+    <polygon points="0,80 69.28,-40 -69.28,-40" />
+    
+    <!-- Inner Hexagon Connections -->
+    <polygon points="0,-40 34.64,-20 34.64,20 0,40 -34.64,20 -34.64,-20" stroke-width="0.2" opacity="0.5" />
+    
+    <!-- Center Point -->
+    <circle cx="0" cy="0" r="2" fill="#FFFFFF" />
+    
+    <!-- Outer Bounding Circle -->
+    <circle cx="0" cy="0" r="80" stroke-width="0.2" opacity="0.4" />
+    
+    <!-- Outer Rings for 3D depth illusion -->
+    <circle cx="0" cy="0" r="100" stroke-width="0.1" opacity="0.2" />
+    <circle cx="0" cy="0" r="110" stroke-width="0.05" opacity="0.1" />
+  </g>
+</svg>

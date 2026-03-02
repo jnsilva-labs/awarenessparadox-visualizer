@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void-black: #050510;
+  --color-gold-alchemical: #D4AF37;
+  --color-ethereal-blue: #8ab4f8;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-void-black text-white selection:bg-gold-alchemical selection:text-void-black m-0 p-0 overflow-hidden;
+    font-family: var(--font-sans);
+  }
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}

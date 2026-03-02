@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-150 -150 300 300" stroke="#FFFFFF" fill="none" stroke-width="0.5">
+  <g opacity="0.8">
+    <!-- Flower of Life (19 overlapping circles) -->
+    <!-- R = 20 -->
+    <!-- Center -->
+    <circle cx="0" cy="0" r="20" />
+    
+    <!-- Inner Ring (6 circles) -->
+    <circle cx="0" cy="-20" r="20" />
+    <circle cx="17.32" cy="-10" r="20" />
+    <circle cx="17.32" cy="10" r="20" />
+    <circle cx="0" cy="20" r="20" />
+    <circle cx="-17.32" cy="10" r="20" />
+    <circle cx="-17.32" cy="-10" r="20" />
+
+    <!-- Outer Ring (12 circles) -->
+    <!-- Top -->
+    <circle cx="0" cy="-40" r="20" />
+    <!-- Top Right segment -->
+    <circle cx="17.32" cy="-30" r="20" />
+    <circle cx="34.64" cy="-20" r="20" />
+    <circle cx="34.64" cy="0" r="20" />
+    <!-- Bottom Right segment -->
+    <circle cx="34.64" cy="20" r="20" />
+    <circle cx="17.32" cy="30" r="20" />
+    <!-- Bottom -->
+    <circle cx="0" cy="40" r="20" />
+    <!-- Bottom Left segment -->
+    <circle cx="-17.32" cy="30" r="20" />
+    <circle cx="-34.64" cy="20" r="20" />
+    <circle cx="-34.64" cy="0" r="20" />
+    <!-- Top Left segment -->
+    <circle cx="-34.64" cy="-20" r="20" />
+    <circle cx="-17.32" cy="-30" r="20" />
+
+    <!-- 2 Bounding Circles around the whole pattern -->
+    <circle cx="0" cy="0" r="60" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="0" cy="0" r="62" stroke-width="0.3" opacity="0.4"/>
+  </g>
+</svg>

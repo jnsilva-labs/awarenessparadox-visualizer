@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -120 240 240" stroke="#FFFFFF" fill="none" stroke-width="0.5">
+  <g opacity="0.8">
+    <!-- Center Circle -->
+    <circle cx="0" cy="0" r="40" />
+    
+    <!-- 6 Intersecting Circles (Radius = 40, offset by 40 at 60 degree intervals) -->
+    <!-- Top -->
+    <circle cx="0" cy="-40" r="40" />
+    <!-- Top Right -->
+    <circle cx="34.64" cy="-20" r="40" />
+    <!-- Bottom Right -->
+    <circle cx="34.64" cy="20" r="40" />
+    <!-- Bottom -->
+    <circle cx="0" cy="40" r="40" />
+    <!-- Bottom Left -->
+    <circle cx="-34.64" cy="20" r="40" />
+    <!-- Top Left -->
+    <circle cx="-34.64" cy="-20" r="40" />
+
+    <!-- Outer bounding circles -->
+    <circle cx="0" cy="0" r="80" stroke-width="0.2" opacity="0.5" />
+    <circle cx="0" cy="0" r="120" stroke-width="0.1" opacity="0.3" />
+  </g>
+</svg>
