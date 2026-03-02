@@ -1298,31 +1298,31 @@ const MassiveVoidKnots = ({ audioDataRef, isMobile, configRefs }) => {
     );
 };
 
-export const ElementUniverse = ({ audioDataRef, isMobile }) => {
+export const ElementUniverse = ({ audioDataRef, isMobile, configRefs }) => {
     return (
         <group>
             {/* Background / Environment Layers */}
-            <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} />
-            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} />
+            <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
             {/* The proven stable components */}
-            <EvolvingSacredCore audioDataRef={audioDataRef} />
+            <EvolvingSacredCore audioDataRef={audioDataRef} configRefs={configRefs} />
 
             {/* Phase 11: The Sacred Mantle of wireframes wrapping the core */}
-            <SacredWireframeMantles audioDataRef={audioDataRef} isMobile={isMobile} />
+            <SacredWireframeMantles audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
-            <InteractiveCursorRipple audioDataRef={audioDataRef} />
-            <FibonacciSpirals audioDataRef={audioDataRef} isMobile={isMobile} />
+            <InteractiveCursorRipple audioDataRef={audioDataRef} configRefs={configRefs} />
+            <FibonacciSpirals audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
             {/* Phase 13: Upgraded to GoldenRatioLattice */}
-            <GoldenRatioLattice audioDataRef={audioDataRef} isMobile={isMobile} />
-            <LightningFlashes audioDataRef={audioDataRef} />
-            <SacredShockwaves audioDataRef={audioDataRef} />
+            <GoldenRatioLattice audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <LightningFlashes audioDataRef={audioDataRef} configRefs={configRefs} />
+            <SacredShockwaves audioDataRef={audioDataRef} configRefs={configRefs} />
             {/* Phase 13: Massive Torus Knots */}
-            <MassiveVoidKnots audioDataRef={audioDataRef} isMobile={isMobile} />
-            <FloatingSacredGeometry audioDataRef={audioDataRef} isMobile={isMobile} />
+            <MassiveVoidKnots audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <FloatingSacredGeometry audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
-            <DriftingPadGeometries audioDataRef={audioDataRef} isMobile={isMobile} />
-            <AlchemicalDust audioDataRef={audioDataRef} isMobile={isMobile} />
+            <DriftingPadGeometries audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <AlchemicalDust audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
             {/* Ambient Background Glow Layer */}
             <mesh position={[0, 0, -50]}>
