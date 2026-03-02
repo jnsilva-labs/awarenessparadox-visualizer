@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, CameraShake, Html } from '@react-three/drei';
-import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration, Glitch } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration, Glitch, HueSaturation, BrightnessContrast } from '@react-three/postprocessing';
 import { BlendFunction, GlitchMode } from 'postprocessing';
 import React, { Suspense, useRef, useMemo } from 'react';
 import * as THREE from 'three';
@@ -10,7 +10,7 @@ import { useVisualizerConfig } from '../ui/VisualizerContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
-const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs }) => {
+const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs, theme }) => {
     const bloomRef = useRef();
     const caRef = useRef();
     const glitchRef = useRef();
@@ -113,8 +113,27 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs }) => {
 
     });
 
+    // Determine static color grading from the active theme
+    let hueRotate = 0;
+    let saturationOffset = 0;
+    let brightnessOffset = 0;
+    let contrastOffset = 0;
+
+    if (theme === 'cyberpunk') {
+        hueRotate = -120 * (Math.PI / 180); // Radian conversion
+        saturationOffset = 1.0; // Force 200% saturation
+        contrastOffset = 0.1; // +10% contrast
+    } else if (theme === 'abyssal') {
+        saturationOffset = -1.0; // Grayscale
+        contrastOffset = 0.3; // +30% contrast
+        brightnessOffset = -0.15; // Moderate darkening
+    }
+
     return (
         <EffectComposer disableNormalPass>
+            <HueSaturation hue={hueRotate} saturation={saturationOffset} />
+            <BrightnessContrast brightness={brightnessOffset} contrast={contrastOffset} />
+
             <Bloom ref={bloomRef} luminanceThreshold={0.98} luminanceSmoothing={0.9} intensity={0.05} mipmapBlur />
 
             {/* The Quantum Glitch (Must sit before CA to tear the screen first) */}
@@ -394,7 +413,7 @@ const SentientCinematicDirector = ({ audioDataRef, configRefs }) => {
 // Isolate the Canvas from the AudioProvider context re-renders.
 // EffectComposer is notoriously buggy when forced to re-render dynamically, 
 // causing "circular JSON" DevTools/HMR crashes when it tries to remount passes.
-const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs }) => {
+const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs, theme }) => {
     return (
         <Canvas
             shadows={false}
@@ -410,7 +429,7 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs }) => 
                 <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
                 {/* Elite Reactive Rendering */}
-                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} theme={theme} />
                 <KinematicCameraShake audioDataRef={audioDataRef} configRefs={configRefs} />
                 <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
                 <SentientCinematicDirector audioDataRef={audioDataRef} configRefs={configRefs} />
@@ -433,21 +452,9 @@ export const VisualizerScene = () => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Hardware-accelerated CSS filters applied to the entire WebGL Canvas Canvas
-    // This allows complete palette overhauls instantly, with zero overhead on the 60fps render loop
-    let canvasFilter = 'none';
-    if (uiState.theme === 'cyberpunk') {
-        canvasFilter = 'hue-rotate(-120deg) saturate(250%) contrast(110%)';
-    } else if (uiState.theme === 'abyssal') {
-        canvasFilter = 'grayscale(100%) contrast(130%) brightness(70%)';
-    }
-
     return (
-        <div
-            className="absolute inset-0 w-full h-full z-0 transition-[filter] duration-700 ease-in-out"
-            style={{ filter: canvasFilter }}
-        >
-            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+        <div className="absolute inset-0 w-full h-full z-0">
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} theme={uiState.theme} />
         </div>
     );
 };

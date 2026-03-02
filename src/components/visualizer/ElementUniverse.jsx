@@ -882,6 +882,7 @@ const VolumetricAudioNebula = ({ audioDataRef, isMobile, configRefs }) => {
     useFrame((state) => {
         if (!pointsRef.current || !audioDataRef.current) return;
 
+        const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current;
         const subBass = Number(audioData.subBass) || 0;
         const bass = Number(audioData.bass) || 0;
