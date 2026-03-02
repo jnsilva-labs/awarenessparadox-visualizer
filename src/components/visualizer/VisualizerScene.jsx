@@ -418,6 +418,8 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
 
 export const VisualizerScene = () => {
     const { audioDataRef } = useAudio();
+    const { configRefs, uiState } = useVisualizerConfig();
+
     // A stable, lightweight check for mobile screen sizes
     const [isMobile, setIsMobile] = React.useState(false);
 
@@ -428,9 +430,21 @@ export const VisualizerScene = () => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Hardware-accelerated CSS filters applied to the entire WebGL Canvas Canvas
+    // This allows complete palette overhauls instantly, with zero overhead on the 60fps render loop
+    let canvasFilter = 'none';
+    if (uiState.theme === 'cyberpunk') {
+        canvasFilter = 'hue-rotate(-120deg) saturate(250%) contrast(110%)';
+    } else if (uiState.theme === 'abyssal') {
+        canvasFilter = 'grayscale(100%) contrast(130%) brightness(70%)';
+    }
+
     return (
-        <div className="absolute inset-0 w-full h-full z-0">
-            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} />
+        <div
+            className="absolute inset-0 w-full h-full z-0 transition-[filter] duration-700 ease-in-out"
+            style={{ filter: canvasFilter }}
+        >
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
         </div>
     );
 };
