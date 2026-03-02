@@ -1,23 +1,28 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, CameraShake, Html } from '@react-three/drei';
-import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration, Glitch } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration, Glitch, HueSaturation, BrightnessContrast } from '@react-three/postprocessing';
 import { BlendFunction, GlitchMode } from 'postprocessing';
 import React, { Suspense, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useAudio } from '../audio/AudioContext';
+import { useVisualizerConfig } from '../ui/VisualizerContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
-const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
+const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs }) => {
+
     const bloomRef = useRef();
     const caRef = useRef();
     const glitchRef = useRef();
+    const hueRef = useRef();
+    const contrastRef = useRef();
+
     // Pre-allocate vector to prevent garbage collection stutter
     const vec2 = useMemo(() => new THREE.Vector2(0, 0), []);
 
     useFrame(() => {
-        if (!bloomRef.current || !caRef.current || !glitchRef.current || !audioDataRef.current) return;
+        if (!bloomRef.current || !caRef.current || !glitchRef.current || !hueRef.current || !contrastRef.current || !audioDataRef.current) return;
 
         const audioData = audioDataRef.current;
 
@@ -36,6 +41,7 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
         // PHASE 12: Absolute Bloom Neutralization. We rely on the mesh emissive materials entirely.
         let nextIntensity = 0.05 + (presence * 0.1) + (mid * 0.1);
         if (!isFinite(nextIntensity) || isNaN(nextIntensity)) nextIntensity = 0.05;
+        if (configRefs?.current?.bloomGlow) nextIntensity *= configRefs.current.bloomGlow;
 
         // Ensure Bloom only captures the literal brightest 1% of the screen
         let nextThreshold = Math.max(0.85, 0.98 - (mid * 0.05));
@@ -111,8 +117,50 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
 
     });
 
+    // Static Color Grading mutations (Done in useFrame to avoid structural Circular JSON crashes)
+    useFrame(() => {
+        if (!hueRef.current || !contrastRef.current || !configRefs.current) return;
+
+        let hueRotate = 0;
+        let saturationOffset = 0;
+        let brightnessOffset = 0;
+        let contrastOffset = 0;
+
+        const activeTheme = configRefs.current.theme || 'sacred';
+
+        if (activeTheme === 'cyberpunk') {
+            hueRotate = -120 * (Math.PI / 180); // Radian conversion
+            saturationOffset = 1.0; // Force 200% saturation
+            contrastOffset = 0.1; // +10% contrast
+        } else if (activeTheme === 'abyssal') {
+            saturationOffset = -1.0; // Grayscale
+            contrastOffset = 0.3; // +30% contrast
+            brightnessOffset = -0.15; // Moderate darkening
+        }
+
+        // Must safely set postprocessing uniforms directly in the loop
+        if (typeof hueRef.current.hue === 'number') {
+            hueRef.current.hue = hueRotate;
+            hueRef.current.saturation = saturationOffset;
+        } else if (hueRef.current.hue?.value !== undefined) {
+            hueRef.current.hue.value = hueRotate;
+            hueRef.current.saturation.value = saturationOffset;
+        }
+
+        if (typeof contrastRef.current.brightness === 'number') {
+            contrastRef.current.brightness = brightnessOffset;
+            contrastRef.current.contrast = contrastOffset;
+        } else if (contrastRef.current.brightness?.value !== undefined) {
+            contrastRef.current.brightness.value = brightnessOffset;
+            contrastRef.current.contrast.value = contrastOffset;
+        }
+    });
+
     return (
         <EffectComposer disableNormalPass>
+            <HueSaturation ref={hueRef} />
+            <BrightnessContrast ref={contrastRef} />
+
             <Bloom ref={bloomRef} luminanceThreshold={0.98} luminanceSmoothing={0.9} intensity={0.05} mipmapBlur />
 
             {/* The Quantum Glitch (Must sit before CA to tear the screen first) */}
@@ -136,7 +184,7 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
 };
 
 // 2. The Vizzy-Tier Tremor Engine
-const KinematicCameraShake = ({ audioDataRef }) => {
+const KinematicCameraShake = ({ audioDataRef, configRefs }) => {
     const shakeRef = useRef();
 
     useFrame((state) => {
@@ -175,7 +223,7 @@ const KinematicCameraShake = ({ audioDataRef }) => {
 };
 
 // 3. Generative Sacred Sigils (Phase 8/9: Subliminal Anchors with 3D Depth)
-const SacredSigilFlashes = ({ audioDataRef }) => {
+const SacredSigilFlashes = ({ audioDataRef, configRefs }) => {
     // Refs to control the DOM elements directly without triggering React re-renders for 60fps performance
     const metatronRef = useRef();
     const seedRef = useRef();
@@ -310,7 +358,7 @@ const SacredSigilFlashes = ({ audioDataRef }) => {
 };
 
 // 4. The Sentient Cinematic Director (Phase 8: AI Camera Cutting)
-const SentientCinematicDirector = ({ audioDataRef }) => {
+const SentientCinematicDirector = ({ audioDataRef, configRefs }) => {
     // We maintain a target spherical coordinate for buttery smooth interpolation
     const targetPos = useRef(new THREE.Spherical(12, Math.PI / 2, 0));
     const previousState = useRef('sacred');
@@ -330,6 +378,7 @@ const SentientCinematicDirector = ({ audioDataRef }) => {
 
         // 1. Base Motion: Majestic 3D Exploratory Figure-8 Orbit
         let orbitSpeed = 0.04; // Very slow, smooth horizontal pan base
+        if (configRefs?.current?.cameraSpeed) orbitSpeed *= configRefs.current.cameraSpeed;
 
         // Propel the camera mathematically around the origin based on pure energy
         if (currentState === 'physical') {
@@ -391,7 +440,7 @@ const SentientCinematicDirector = ({ audioDataRef }) => {
 // Isolate the Canvas from the AudioProvider context re-renders.
 // EffectComposer is notoriously buggy when forced to re-render dynamically, 
 // causing "circular JSON" DevTools/HMR crashes when it tries to remount passes.
-const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
+const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs }) => {
     return (
         <Canvas
             shadows={false}
@@ -404,13 +453,13 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
 
             <Suspense fallback={null}>
                 {/* The Universe Elements */}
-                <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} />
+                <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
                 {/* Elite Reactive Rendering */}
-                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} />
-                <KinematicCameraShake audioDataRef={audioDataRef} />
-                <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} />
-                <SentientCinematicDirector audioDataRef={audioDataRef} />
+                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+                <KinematicCameraShake audioDataRef={audioDataRef} configRefs={configRefs} />
+                <SacredSigilFlashes audioDataRef={audioDataRef} configRefs={configRefs} />
+                <SentientCinematicDirector audioDataRef={audioDataRef} configRefs={configRefs} />
             </Suspense>
         </Canvas>
     );
@@ -418,6 +467,8 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
 
 export const VisualizerScene = () => {
     const { audioDataRef } = useAudio();
+    const { configRefs } = useVisualizerConfig(); // Context is completely sealed, so this never causes a re-render.
+
     // A stable, lightweight check for mobile screen sizes
     const [isMobile, setIsMobile] = React.useState(false);
 
@@ -430,7 +481,7 @@ export const VisualizerScene = () => {
 
     return (
         <div className="absolute inset-0 w-full h-full z-0">
-            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} />
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
         </div>
     );
 };
