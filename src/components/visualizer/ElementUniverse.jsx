@@ -56,7 +56,7 @@ const getGlobalHue = (time, audioData, offset = 0) => {
 
 // --- Phase 13: The 3D Merkaba (Star Tetrahedron) ---
 // Two overlapping, intersecting tetrahedrons that spin independently within the core
-const MerkabaShell = ({ audioDataRef, baseHue }) => {
+const MerkabaShell = ({ audioDataRef, baseHue, configRefs }) => {
     const groupRef = useRef();
     const upTetraRef = useRef();
     const downTetraRef = useRef();
@@ -108,7 +108,7 @@ const MerkabaShell = ({ audioDataRef, baseHue }) => {
 };
 
 // 1. The Morphing Sacred Core (Stationary, deeply evolving Platonic Solids)
-const EvolvingSacredCore = ({ audioDataRef }) => {
+const EvolvingSacredCore = ({ audioDataRef, configRefs }) => {
     const torusRef = useRef();
     const dodecaRef = useRef();
     const icosaRef = useRef();
@@ -228,7 +228,7 @@ const EvolvingSacredCore = ({ audioDataRef }) => {
 };
 
 // 1.5 Sierpinski Triangle Fractal
-const SierpinskiFractal = ({ audioDataRef, isMobile }) => {
+const SierpinskiFractal = ({ audioDataRef, isMobile, configRefs }) => {
     const instancedRef = useRef();
     const groupRef = useRef();
     const DEPTH = isMobile ? 4 : 5; // 256 tetrahedrons on mobile vs 1024 on desktop
@@ -313,7 +313,7 @@ const SierpinskiFractal = ({ audioDataRef, isMobile }) => {
 };
 
 // 2. Fibonacci Particle System (Highs & Percussion)
-const FibonacciSpirals = ({ audioDataRef, isMobile }) => {
+const FibonacciSpirals = ({ audioDataRef, isMobile, configRefs }) => {
     const pointsRef = useRef();
 
     // 10,000 points on desktop, 3,000 on mobile
@@ -414,7 +414,7 @@ const FibonacciSpirals = ({ audioDataRef, isMobile }) => {
 };
 
 // 3. Lightning Flashes (Sub-Bass Reactivity) - The stable original version
-const LightningFlashes = ({ audioDataRef }) => {
+const LightningFlashes = ({ audioDataRef, configRefs }) => {
     const flashRef = useRef();
 
     useFrame(() => {
@@ -447,7 +447,7 @@ const LightningFlashes = ({ audioDataRef }) => {
 };
 
 // 4. Sacred Shockwaves (Sub-Bass Detonation)
-const SacredShockwaves = ({ audioDataRef }) => {
+const SacredShockwaves = ({ audioDataRef, configRefs }) => {
     const shockRef = useRef();
     const NUM_RINGS = 3;
     const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -530,7 +530,7 @@ const SacredShockwaves = ({ audioDataRef }) => {
 };
 
 // 5. Floating Geometries (Background Environment)
-const FloatingSacredGeometry = ({ audioDataRef, isMobile }) => {
+const FloatingSacredGeometry = ({ audioDataRef, isMobile, configRefs }) => {
     const dodecaRef = useRef();
     const icosaRef = useRef();
     const torusRef = useRef();
@@ -620,7 +620,7 @@ const FloatingSacredGeometry = ({ audioDataRef, isMobile }) => {
 };
 
 // 5.5 Sacred Mantles (Phase 11: The Secret Geometry World)
-const SacredWireframeMantles = ({ audioDataRef, isMobile }) => {
+const SacredWireframeMantles = ({ audioDataRef, isMobile, configRefs }) => {
     const groupRef = useRef();
     const icosaRef = useRef();
     const tetraRef = useRef();
@@ -689,7 +689,7 @@ const SacredWireframeMantles = ({ audioDataRef, isMobile }) => {
             tetraRotations: tr,
             scaffoldLineGeometry: geo
         };
-    }, []);
+    }, [NUM_GEOMETRIES]);
 
     useEffect(() => {
         if (!icosaRef.current || !tetraRef.current) return;
@@ -709,7 +709,7 @@ const SacredWireframeMantles = ({ audioDataRef, isMobile }) => {
         }
         icosaRef.current.instanceMatrix.needsUpdate = true;
         tetraRef.current.instanceMatrix.needsUpdate = true;
-    }, [dummy, icosaPositions, icosaRotations, tetraPositions, tetraRotations]);
+    }, [dummy, icosaPositions, icosaRotations, tetraPositions, tetraRotations, NUM_GEOMETRIES]);
 
     useFrame((state) => {
         if (!groupRef.current || !audioDataRef.current || !icosaRef.current || !tetraRef.current) return;
@@ -772,7 +772,7 @@ const SacredWireframeMantles = ({ audioDataRef, isMobile }) => {
 };
 
 // 6. Brass & Pads Frames (Drifting peripheral sacred geometry reacting to sustained chords)
-const DriftingPadGeometries = ({ audioDataRef, isMobile }) => {
+const DriftingPadGeometries = ({ audioDataRef, isMobile, configRefs }) => {
     const groupRef = useRef();
     const meshRef = useRef();
 
@@ -803,7 +803,7 @@ const DriftingPadGeometries = ({ audioDataRef, isMobile }) => {
             sca.push(Math.random() * 2.0 + 1.0);
         }
         return { positions: pos, rotations: rot, scales: sca };
-    }, []);
+    }, [isMobile]);
 
     useEffect(() => {
         if (!meshRef.current) return;
@@ -815,7 +815,7 @@ const DriftingPadGeometries = ({ audioDataRef, isMobile }) => {
             meshRef.current.setMatrixAt(i, dummy.matrix);
         }
         meshRef.current.instanceMatrix.needsUpdate = true;
-    }, [dummy, positions, rotations, scales]);
+    }, [dummy, positions, rotations, scales, NUM_GEOMETRIES]);
 
     useFrame((state) => {
         if (!meshRef.current || !audioDataRef.current || !groupRef.current) return;
@@ -857,7 +857,7 @@ const DriftingPadGeometries = ({ audioDataRef, isMobile }) => {
 };
 
 // 7. Volumetric Audio Nebula (Phase 8: Dense interactive background dust)
-const VolumetricAudioNebula = ({ audioDataRef, isMobile }) => {
+const VolumetricAudioNebula = ({ audioDataRef, isMobile, configRefs }) => {
     const pointsRef = useRef();
 
     const PARTICLES = isMobile ? 2000 : 8000;
@@ -877,16 +877,22 @@ const VolumetricAudioNebula = ({ audioDataRef, isMobile }) => {
             pos[i * 3 + 2] = radius * Math.cos(phi);
         }
         return pos;
-    }, []);
+    }, [PARTICLES]);
 
     useFrame((state) => {
         if (!pointsRef.current || !audioDataRef.current) return;
 
-        const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current;
         const subBass = Number(audioData.subBass) || 0;
         const bass = Number(audioData.bass) || 0;
         const stateStyle = audioData.alchemicalState || 'sacred';
+
+        if (configRefs.current) {
+            const config = configRefs.current;
+            let newCount = Math.floor(PARTICLES * config.geometryDensity);
+            if (config.theme === 'abyssal') newCount = 0; // The Void has no nebula
+            pointsRef.current.geometry.setDrawRange(0, newCount);
+        }
 
         // Slow cinematic drift
         pointsRef.current.rotation.y = time * 0.02;
@@ -940,7 +946,7 @@ const VolumetricAudioNebula = ({ audioDataRef, isMobile }) => {
 
 
 // 8. The Void Wormhole (Endless Z-Axis Tunnel)
-const VoidWormhole = ({ audioDataRef }) => {
+const VoidWormhole = ({ audioDataRef, configRefs }) => {
     const tunnelRef = useRef();
     const NUM_RINGS = 25;
     const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -991,7 +997,7 @@ const VoidWormhole = ({ audioDataRef }) => {
 };
 
 // 9. Alchemical Dust (Massive atmospheric foreground particles)
-const AlchemicalDust = ({ audioDataRef, isMobile }) => {
+const AlchemicalDust = ({ audioDataRef, isMobile, configRefs }) => {
     const dustRef = useRef();
     const NUM_PARTICLES = isMobile ? 800 : 2500;
 
@@ -1007,7 +1013,7 @@ const AlchemicalDust = ({ audioDataRef, isMobile }) => {
             factors[i] = Math.random(); // Unique drift speed
         }
         return { positions: pos, randomFactors: factors };
-    }, []);
+    }, [NUM_PARTICLES]);
 
     useFrame((state, delta) => {
         if (!dustRef.current || !audioDataRef.current) return;
@@ -1016,6 +1022,13 @@ const AlchemicalDust = ({ audioDataRef, isMobile }) => {
         const subBass = Number(audioData.subBass) || 0.001;
         const time = state.clock.elapsedTime;
         const positions = dustRef.current.geometry.attributes.position.array;
+
+        if (configRefs.current) {
+            const config = configRefs.current;
+            let newCount = Math.floor(NUM_PARTICLES * config.geometryDensity);
+            if (config.theme === 'abyssal') newCount = 0; // The Void has no dust
+            dustRef.current.geometry.setDrawRange(0, newCount);
+        }
 
         // Animate dust drifting slowly upwards & swirling
         for (let i = 0; i < NUM_PARTICLES; i++) {
@@ -1064,7 +1077,7 @@ const AlchemicalDust = ({ audioDataRef, isMobile }) => {
 
 // 7. Golden Ratio Lattice (Phase 13: 3D Phyllotaxis)
 // Replaces the flat spirals with a dense spherical lattice mapped via the Golden Angle
-const GoldenRatioLattice = ({ audioDataRef, isMobile }) => {
+const GoldenRatioLattice = ({ audioDataRef, isMobile, configRefs }) => {
     const meshRef = useRef();
     const NUM_PARTICLES = isMobile ? 120 : 300;
     const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
@@ -1086,7 +1099,7 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile }) => {
             pts.push(new THREE.Vector3(x, y, z));
         }
         return pts;
-    }, []);
+    }, [NUM_PARTICLES]);
 
     useFrame((state) => {
         if (!meshRef.current || !audioDataRef.current) return;
@@ -1096,7 +1109,14 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile }) => {
         const hihat = Number(audioData.hihat) || 0;
         const stateStyle = audioData.alchemicalState || 'sacred';
 
-        const baseHue = getGlobalHue(time, audioDataRef.current);
+        if (configRefs.current) {
+            const config = configRefs.current;
+            let newCount = Math.floor(NUM_PARTICLES * config.geometryDensity);
+            if (config.theme === 'abyssal') newCount = 0; // Wipe from existence in void
+            meshRef.current.count = newCount;
+        }
+
+        let baseHue = getGlobalHue(time, audioDataRef.current);
 
         // Entire sphere breathes and slowly rotates
         meshRef.current.rotation.y = time * 0.05;
@@ -1144,7 +1164,7 @@ const GoldenRatioLattice = ({ audioDataRef, isMobile }) => {
 };
 
 // 10. Interactive Cursor Ripple (Phase 8: User Presence)
-const InteractiveCursorRipple = ({ audioDataRef }) => {
+const InteractiveCursorRipple = ({ audioDataRef, configRefs }) => {
     const meshRef = useRef();
     const NUM_ORBS = 40; // Length of the trail
     const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -1169,7 +1189,14 @@ const InteractiveCursorRipple = ({ audioDataRef }) => {
 
         const time = state.clock.elapsedTime;
         const audioData = audioDataRef.current; // Phase 12 needed for getGlobalHue signature
-        const baseHue = getGlobalHue(time, audioData, 0.2); // Golden/Teal accent
+        const baseHue = getGlobalHue(time, audioData, 0.5);
+
+        // Apply interactive Geometry Density limit without remounting arrays
+        if (configRefs.current) {
+            let newCount = Math.floor(NUM_ORBS * configRefs.current.geometryDensity);
+            if (configRefs.current.theme === 'abyssal') newCount = 0; // Wipe from existence in void
+            meshRef.current.count = newCount;
+        }
 
         for (let i = 0; i < NUM_ORBS; i++) {
             const histPos = trailHistory.current[i];
@@ -1201,7 +1228,7 @@ const InteractiveCursorRipple = ({ audioDataRef }) => {
 
 // --- Phase 13: Torus Knot Energy Fields ---
 // Massive, intricate sacred knots slowly navigating the deep void
-const MassiveVoidKnots = ({ audioDataRef, isMobile }) => {
+const MassiveVoidKnots = ({ audioDataRef, isMobile, configRefs }) => {
     const meshRef = useRef();
     const NUM_KNOTS = isMobile ? 4 : 12; // 12 massive knots on desktop, 4 on mobile
     const dummy = useMemo(() => new THREE.Object3D(), [isMobile]);
@@ -1271,31 +1298,31 @@ const MassiveVoidKnots = ({ audioDataRef, isMobile }) => {
     );
 };
 
-export const ElementUniverse = ({ audioDataRef, isMobile }) => {
+export const ElementUniverse = ({ audioDataRef, isMobile, configRefs }) => {
     return (
         <group>
             {/* Background / Environment Layers */}
-            <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} />
-            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} />
+            <VolumetricAudioNebula audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <VoidWormhole audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
             {/* The proven stable components */}
-            <EvolvingSacredCore audioDataRef={audioDataRef} />
+            <EvolvingSacredCore audioDataRef={audioDataRef} configRefs={configRefs} />
 
             {/* Phase 11: The Sacred Mantle of wireframes wrapping the core */}
-            <SacredWireframeMantles audioDataRef={audioDataRef} isMobile={isMobile} />
+            <SacredWireframeMantles audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
-            <InteractiveCursorRipple audioDataRef={audioDataRef} />
-            <FibonacciSpirals audioDataRef={audioDataRef} isMobile={isMobile} />
+            <InteractiveCursorRipple audioDataRef={audioDataRef} configRefs={configRefs} />
+            <FibonacciSpirals audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
             {/* Phase 13: Upgraded to GoldenRatioLattice */}
-            <GoldenRatioLattice audioDataRef={audioDataRef} isMobile={isMobile} />
-            <LightningFlashes audioDataRef={audioDataRef} />
-            <SacredShockwaves audioDataRef={audioDataRef} />
+            <GoldenRatioLattice audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <LightningFlashes audioDataRef={audioDataRef} configRefs={configRefs} />
+            <SacredShockwaves audioDataRef={audioDataRef} configRefs={configRefs} />
             {/* Phase 13: Massive Torus Knots */}
-            <MassiveVoidKnots audioDataRef={audioDataRef} isMobile={isMobile} />
-            <FloatingSacredGeometry audioDataRef={audioDataRef} isMobile={isMobile} />
+            <MassiveVoidKnots audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <FloatingSacredGeometry audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
-            <DriftingPadGeometries audioDataRef={audioDataRef} isMobile={isMobile} />
-            <AlchemicalDust audioDataRef={audioDataRef} isMobile={isMobile} />
+            <DriftingPadGeometries audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+            <AlchemicalDust audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
             {/* Ambient Background Glow Layer */}
             <mesh position={[0, 0, -50]}>

@@ -6,10 +6,11 @@ import React, { Suspense, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useAudio } from '../audio/AudioContext';
+import { useVisualizerConfig } from '../ui/VisualizerContext';
 import { ElementUniverse } from './ElementUniverse';
 
 // --- Reactive Post Processing Engine ---
-const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
+const AudioReactiveEffects = ({ audioDataRef, isMobile, configRefs }) => {
     const bloomRef = useRef();
     const caRef = useRef();
     const glitchRef = useRef();
@@ -36,6 +37,7 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
         // PHASE 12: Absolute Bloom Neutralization. We rely on the mesh emissive materials entirely.
         let nextIntensity = 0.05 + (presence * 0.1) + (mid * 0.1);
         if (!isFinite(nextIntensity) || isNaN(nextIntensity)) nextIntensity = 0.05;
+        if (configRefs?.current?.bloomGlow) nextIntensity *= configRefs.current.bloomGlow;
 
         // Ensure Bloom only captures the literal brightest 1% of the screen
         let nextThreshold = Math.max(0.85, 0.98 - (mid * 0.05));
@@ -136,7 +138,7 @@ const AudioReactiveEffects = ({ audioDataRef, isMobile }) => {
 };
 
 // 2. The Vizzy-Tier Tremor Engine
-const KinematicCameraShake = ({ audioDataRef }) => {
+const KinematicCameraShake = ({ audioDataRef, configRefs }) => {
     const shakeRef = useRef();
 
     useFrame((state) => {
@@ -175,7 +177,7 @@ const KinematicCameraShake = ({ audioDataRef }) => {
 };
 
 // 3. Generative Sacred Sigils (Phase 8/9: Subliminal Anchors with 3D Depth)
-const SacredSigilFlashes = ({ audioDataRef }) => {
+const SacredSigilFlashes = ({ audioDataRef, configRefs }) => {
     // Refs to control the DOM elements directly without triggering React re-renders for 60fps performance
     const metatronRef = useRef();
     const seedRef = useRef();
@@ -310,7 +312,7 @@ const SacredSigilFlashes = ({ audioDataRef }) => {
 };
 
 // 4. The Sentient Cinematic Director (Phase 8: AI Camera Cutting)
-const SentientCinematicDirector = ({ audioDataRef }) => {
+const SentientCinematicDirector = ({ audioDataRef, configRefs }) => {
     // We maintain a target spherical coordinate for buttery smooth interpolation
     const targetPos = useRef(new THREE.Spherical(12, Math.PI / 2, 0));
     const previousState = useRef('sacred');
@@ -330,6 +332,7 @@ const SentientCinematicDirector = ({ audioDataRef }) => {
 
         // 1. Base Motion: Majestic 3D Exploratory Figure-8 Orbit
         let orbitSpeed = 0.04; // Very slow, smooth horizontal pan base
+        if (configRefs?.current?.cameraSpeed) orbitSpeed *= configRefs.current.cameraSpeed;
 
         // Propel the camera mathematically around the origin based on pure energy
         if (currentState === 'physical') {
@@ -391,7 +394,7 @@ const SentientCinematicDirector = ({ audioDataRef }) => {
 // Isolate the Canvas from the AudioProvider context re-renders.
 // EffectComposer is notoriously buggy when forced to re-render dynamically, 
 // causing "circular JSON" DevTools/HMR crashes when it tries to remount passes.
-const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
+const VisualizerCanvas = React.memo(({ audioDataRef, isMobile, configRefs }) => {
     return (
         <Canvas
             shadows={false}
@@ -404,13 +407,13 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
 
             <Suspense fallback={null}>
                 {/* The Universe Elements */}
-                <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} />
+                <ElementUniverse audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
 
                 {/* Elite Reactive Rendering */}
-                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} />
-                <KinematicCameraShake audioDataRef={audioDataRef} />
-                <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} />
-                <SentientCinematicDirector audioDataRef={audioDataRef} />
+                <AudioReactiveEffects audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+                <KinematicCameraShake audioDataRef={audioDataRef} configRefs={configRefs} />
+                <SacredSigilFlashes audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
+                <SentientCinematicDirector audioDataRef={audioDataRef} configRefs={configRefs} />
             </Suspense>
         </Canvas>
     );
@@ -418,6 +421,8 @@ const VisualizerCanvas = React.memo(({ audioDataRef, isMobile }) => {
 
 export const VisualizerScene = () => {
     const { audioDataRef } = useAudio();
+    const { configRefs, uiState } = useVisualizerConfig();
+
     // A stable, lightweight check for mobile screen sizes
     const [isMobile, setIsMobile] = React.useState(false);
 
@@ -428,9 +433,21 @@ export const VisualizerScene = () => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Hardware-accelerated CSS filters applied to the entire WebGL Canvas Canvas
+    // This allows complete palette overhauls instantly, with zero overhead on the 60fps render loop
+    let canvasFilter = 'none';
+    if (uiState.theme === 'cyberpunk') {
+        canvasFilter = 'hue-rotate(-120deg) saturate(250%) contrast(110%)';
+    } else if (uiState.theme === 'abyssal') {
+        canvasFilter = 'grayscale(100%) contrast(130%) brightness(70%)';
+    }
+
     return (
-        <div className="absolute inset-0 w-full h-full z-0">
-            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} />
+        <div
+            className="absolute inset-0 w-full h-full z-0 transition-[filter] duration-700 ease-in-out"
+            style={{ filter: canvasFilter }}
+        >
+            <VisualizerCanvas audioDataRef={audioDataRef} isMobile={isMobile} configRefs={configRefs} />
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, createContext, useContext } from 'react';
+import { useVisualizerConfig } from '../ui/VisualizerContext';
 
 // Create a context so any component can access the audio data
 const AudioContextContext = createContext(null);
@@ -6,6 +7,10 @@ const AudioContextContext = createContext(null);
 export const useAudio = () => useContext(AudioContextContext);
 
 export const AudioProvider = ({ children }) => {
+    // Optionally extract the config. If AudioProvider is used without a VisualizerProvider parent, gracefully fallback.
+    const visualizerConfig = useVisualizerConfig();
+    const configRefs = visualizerConfig ? visualizerConfig.configRefs : null;
+
     const audioContextRef = useRef(null);
     const analyserRef = useRef(null);
     const sourceRef = useRef(null);
@@ -236,14 +241,20 @@ export const AudioProvider = ({ children }) => {
 
                 const bands = bandBinsRef.current;
 
-                // Calculate current frame energy
-                const currentSubBass = getAverage(bands.subBass[0], bands.subBass[1]);
-                const currentBass = getAverage(bands.bass[0], bands.bass[1]);
-                const currentLowMid = getAverage(bands.lowMid[0], bands.lowMid[1]);
-                const currentMid = getAverage(bands.mid[0], bands.mid[1]);
-                const currentHighMid = getAverage(bands.highMid[0], bands.highMid[1]);
-                const currentPresence = getAverage(bands.presence[0], bands.presence[1]);
-                const currentBrilliance = getAverage(bands.brilliance[0], bands.brilliance[1]);
+                // Grab user-defined visualizer config refs down from the UI context dynamically
+                let sensitivity = 1.0;
+                if (configRefs?.sensitivity) {
+                    sensitivity = configRefs.sensitivity;
+                }
+
+                // Calculate current frame energy and dynamically boost/cut the amplitude limits mapping
+                const currentSubBass = Math.min(getAverage(bands.subBass[0], bands.subBass[1]) * sensitivity, 1.0);
+                const currentBass = Math.min(getAverage(bands.bass[0], bands.bass[1]) * sensitivity, 1.0);
+                const currentLowMid = Math.min(getAverage(bands.lowMid[0], bands.lowMid[1]) * sensitivity, 1.0);
+                const currentMid = Math.min(getAverage(bands.mid[0], bands.mid[1]) * sensitivity, 1.0);
+                const currentHighMid = Math.min(getAverage(bands.highMid[0], bands.highMid[1]) * sensitivity, 1.0);
+                const currentPresence = Math.min(getAverage(bands.presence[0], bands.presence[1]) * sensitivity, 1.0);
+                const currentBrilliance = Math.min(getAverage(bands.brilliance[0], bands.brilliance[1]) * sensitivity, 1.0);
 
                 const rawPadsLayer = (currentLowMid + currentMid) / 2.0;
 
