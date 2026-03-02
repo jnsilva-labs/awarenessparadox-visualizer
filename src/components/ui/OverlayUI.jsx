@@ -1,17 +1,12 @@
 import { useRef, useEffect, useState } from 'react';
 import { useAudio } from '../audio/AudioContext';
-import { useVisualizerConfig } from './VisualizerContext';
 
 export const OverlayUI = () => {
     const { isPlaying, isMicActive, processAudio, startMicrophoneCapture, stopAudio, audioDataRef, audioDevices } = useAudio();
-    const { uiState, updateConfig } = useVisualizerConfig();
-
     const fileInputRef = useRef(null);
     const titleRef = useRef(null);
-
     const [debugLogs, setDebugLogs] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState('');
-    const [showControls, setShowControls] = useState(false);
 
     // Global Error Catcher for On-Screen Debugging
     useEffect(() => {
@@ -101,7 +96,7 @@ export const OverlayUI = () => {
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-8 z-10 w-full h-full">
             {/* Top Header */}
             <header className="flex flex-col md:flex-row justify-between items-start w-full gap-4 md:gap-0">
-                <div className="flex flex-col drop-shadow-lg">
+                <div className="flex flex-col">
                     <h1
                         ref={titleRef}
                         className="text-2xl md:text-3xl font-light tracking-widest text-white/90 uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-[letter-spacing,text-shadow] duration-75"
@@ -124,7 +119,7 @@ export const OverlayUI = () => {
                     />
 
                     {!isPlaying ? (
-                        <div className="flex flex-col items-start md:items-end gap-2 md:gap-3 w-full md:w-auto drop-shadow-lg">
+                        <div className="flex flex-col items-start md:items-end gap-2 md:gap-3 w-full md:w-auto">
                             {audioDevices.length > 0 && (
                                 <select
                                     className="w-full md:w-auto px-2 md:px-4 py-1.5 md:py-2 bg-black/50 border border-white/20 text-white/80 rounded-sm text-[10px] md:text-xs tracking-wider uppercase backdrop-blur-md outline-none focus:border-ethereal-blue transition-colors"
@@ -139,18 +134,18 @@ export const OverlayUI = () => {
                                     ))}
                                 </select>
                             )}
-                            <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto drop-shadow-xl shadow-black">
+                            <div className="flex flex-row gap-2 md:gap-4 w-full md:w-auto">
                                 <button
                                     onClick={() => startMicrophoneCapture(selectedDeviceId)}
-                                    className="flex-1 md:flex-none px-2 md:px-6 py-2 md:py-2 bg-ethereal-blue/10 border border-black/80 text-ethereal-blue hover:bg-ethereal-blue/20 hover:border-ethereal-blue hover:shadow-[0_0_20px_rgba(100,200,255,0.4)] transition-all duration-300 rounded-sm backdrop-blur-md text-[10px] md:text-sm tracking-widest md:tracking-wider uppercase font-bold"
+                                    className="flex-1 md:flex-none px-2 md:px-6 py-2 md:py-2 bg-ethereal-blue/10 border border-ethereal-blue/30 text-ethereal-blue hover:bg-ethereal-blue/20 hover:border-ethereal-blue hover:shadow-[0_0_20px_rgba(100,200,255,0.4)] transition-all duration-300 rounded-sm backdrop-blur-md text-[10px] md:text-sm tracking-widest md:tracking-wider uppercase"
                                 >
-                                    System Audio
+                                    SYSTEM AUDIO
                                 </button>
                                 <button
                                     onClick={handleUploadClick}
-                                    className="flex-1 md:flex-none px-2 md:px-6 py-2 md:py-2 bg-white/5 border border-black/80 hover:bg-gold-alchemical/20 hover:border-gold-alchemical hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all duration-300 rounded-sm backdrop-blur-md text-[10px] md:text-sm tracking-widest md:tracking-wider uppercase font-bold text-white/80"
+                                    className="flex-1 md:flex-none px-2 md:px-6 py-2 md:py-2 bg-white/5 border border-white/20 hover:bg-gold-alchemical/20 hover:border-gold-alchemical hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] transition-all duration-300 rounded-sm backdrop-blur-md text-[10px] md:text-sm tracking-widest md:tracking-wider uppercase"
                                 >
-                                    Upload Audio
+                                    UPLOAD AUDIO
                                 </button>
                             </div>
                         </div>
@@ -167,107 +162,15 @@ export const OverlayUI = () => {
                 </div>
             </header>
 
-            {/* Bottom Footer & Interactive HUD */}
-            <footer className="w-full flex justify-between items-end pb-2 pointer-events-auto">
-                <div className="flex flex-col gap-4">
-                    {/* The Control Panel HUD */}
-                    {showControls && (
-                        <div className="bg-black/80 border border-white/20 backdrop-blur-2xl p-4 md:p-6 rounded-md w-[85vw] md:w-80 flex flex-col gap-6 shadow-2xl transition-all origin-bottom-left animate-in fade-in zoom-in-95 duration-200">
-
-                            {/* Theme Selector */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-gold-alchemical tracking-widest uppercase flex justify-between">
-                                    <span>Aesthetic Override</span>
-                                </label>
-                                <select
-                                    className="px-3 py-2 bg-black/50 border border-white/20 text-white/90 rounded-sm text-[10px] md:text-xs tracking-wider uppercase outline-none focus:border-ethereal-blue transition-colors"
-                                    value={uiState.theme}
-                                    onChange={(e) => updateConfig('theme', e.target.value)}
-                                >
-                                    <option value="sacred">Sacred Alchemy (Default)</option>
-                                    <option value="cyberpunk">Cyberpunk Matrix</option>
-                                    <option value="abyssal">Abyssal Void</option>
-                                </select>
-                            </div>
-
-                            {/* Sensitivity Slider */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
-                                    <span>Reactivity Override</span>
-                                    <span>{uiState.sensitivity.toFixed(1)}x</span>
-                                </label>
-                                <input
-                                    type="range" min="0.1" max="3.0" step="0.1"
-                                    value={uiState.sensitivity}
-                                    onChange={(e) => updateConfig('sensitivity', parseFloat(e.target.value))}
-                                    className="w-full accent-ethereal-blue"
-                                />
-                            </div>
-
-                            {/* Camera Momentum Slider */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
-                                    <span>Orbital Momentum</span>
-                                    <span>{uiState.cameraSpeed.toFixed(1)}x</span>
-                                </label>
-                                <input
-                                    type="range" min="0.1" max="3.0" step="0.1"
-                                    value={uiState.cameraSpeed}
-                                    onChange={(e) => updateConfig('cameraSpeed', parseFloat(e.target.value))}
-                                    className="w-full accent-ethereal-blue"
-                                />
-                            </div>
-
-                            {/* Bloom Glow Slider */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-white/80 tracking-widest uppercase flex justify-between">
-                                    <span>Luminescence Output</span>
-                                    <span>{uiState.bloomGlow.toFixed(1)}x</span>
-                                </label>
-                                <input
-                                    type="range" min="0.0" max="3.0" step="0.1"
-                                    value={uiState.bloomGlow}
-                                    onChange={(e) => updateConfig('bloomGlow', parseFloat(e.target.value))}
-                                    className="w-full accent-gold-alchemical"
-                                />
-                            </div>
-
-                            {/* Particle Density Slider */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] md:text-xs text-red-400/90 tracking-widest uppercase flex justify-between">
-                                    <span>Geometry Limit (GPU)</span>
-                                    <span>{uiState.geometryDensity.toFixed(1)}x</span>
-                                </label>
-                                <input
-                                    type="range" min="0.2" max="2.0" step="0.1"
-                                    value={uiState.geometryDensity}
-                                    onChange={(e) => updateConfig('geometryDensity', parseFloat(e.target.value))}
-                                    className="w-full accent-red-500/80"
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Controls Toggle Button */}
-                    <button
-                        onClick={() => setShowControls(!showControls)}
-                        className={`px-4 py-2 border rounded-sm backdrop-blur-md text-[10px] md:text-xs tracking-widest uppercase transition-all duration-300 w-max ${showControls
-                                ? 'bg-ethereal-blue/20 border-ethereal-blue text-white shadow-[0_0_15px_rgba(100,200,255,0.3)]'
-                                : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-ethereal-blue hover:text-white'
-                            }`}
-                    >
-                        {showControls ? 'Close Architecture' : 'Modify Realities'}
-                    </button>
-
-                    {/* Status Text */}
-                    <p className="text-[9px] md:text-xs text-white/30 tracking-widest uppercase mt-2 drop-shadow-md pointer-events-none w-max">
-                        {isPlaying
-                            ? (isMicActive ? 'Listening to Environment // Quantum Field Engaged' : 'File Sync Active // Quantum Field Engaged')
-                            : 'Awaiting Resonance'}
-                    </p>
-                </div>
+            {/* Bottom info (optional) */}
+            <footer className="w-full flex justify-between items-end pb-2">
+                <p className="text-xs text-white/30 tracking-widest uppercase">
+                    {isPlaying
+                        ? (isMicActive ? 'Listening to Environment // Quantum Field Engaged' : 'File Sync Active // Quantum Field Engaged')
+                        : 'Awaiting Resonance'}
+                </p>
+                {/* Name removed for clean presentation */}
             </footer>
-
             {/* Global Error Overlay */}
             {debugLogs.length > 0 && (
                 <div className="absolute top-0 right-0 p-4 max-w-xl w-full z-[100] pointer-events-none">
