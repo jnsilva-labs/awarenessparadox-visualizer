@@ -1,16 +1,66 @@
-# React + Vite
+<br/>
+<div align="center">
+<a href="https://visualizer.awarenessparadox.com">
+<img src="https://visualizer.awarenessparadox.com/og-image.png" alt="Awareness Paradox | Interactive Audio Visualizer" width="100%">
+</a>
+</div>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Awareness Paradox | Interactive Audio Visualizer
 
-Currently, two official plugins are available:
+An elite, high-performance WebGL audio visualization engine. This project translates raw audio data into breathtaking 3D metaphysical and sacred geometry environments in true 60fps real-time.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Built utilizing a custom high-resolution Fast Fourier Transform (FFT) audio engine, the visualizer dissects audio tracks into 7 distinct frequency bands (Sub-bass, Bass, Low-Mid, Mid, High-Mid, Presence, Brilliance) and physically maps them to individual components of a complex procedural 3D world.
 
-## React Compiler
+[**Experience the Visualizer Live**](https://visualizer.awarenessparadox.com/)
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+---
 
-## Expanding the ESLint configuration
+## 🌌 Core Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🎛️ Elite Audio Engine
+- **Granular Transient Detection:** Captures instantaneous percussion impacts with zero latency.
+- **7-Band Frequency Isolation:** Maps specific instruments (kicks, snares, strings, synths) to isolated geometric elements.
+- **The Alchemical State Engine:** A mathematical running-average buffer that classifies genre on the fly, smoothly shifting the visualizer between "Physical" (heavy bass), "Ethereal" (ambient pads), and "Sacred" (balanced) states.
+
+### 📐 WebGL & Procedural Geometry
+- **Zero-Latency Instancing:** Employs `THREE.InstancedMesh` for rendering thousands of overlapping platonic solids, fractals, and wireframes with virtually zero dropped frames.
+- **Metaphysical Architecture:** Explore intricate 3D representations of Metatron's Cube, Sierpinski fractals, Merkaba intersecting tetrahedrons, and the Flower of Life.
+- **Responsive Post-Processing:** Bloom thresholds, chromatic aberration distortion, and camera movement inertia are all dynamically driven by track intensity.
+
+### 🎭 Curated Thematic Skins
+The engine ships with three distinct visual paradigms that completely overhaul the post-processing stack and geometry:
+1. **Sacred Alchemy:** A majestic, deep-space environment that cycles through curated celestial hues (Mystic Purple, Alchemical Magenta, Celestial Blue, Solar Amber).
+2. **Cyberpunk Matrix:** A harsh, high-contrast digital realm dominated by Matrix greens, aggressive digital rain, and CRT/VHS glitch tearing artifacts.
+3. **Abyssal Void:** A strict, monochrome voyage into a black hole featuring immense atmospheric scale and terrifying film grain.
+
+---
+
+## 🛠️ Technology Stack
+
+- **[React 18](https://react.dev/)**
+- **[Three.js](https://threejs.org/)** & **[React Three Fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction)**
+- **[@react-three/drei](https://github.com/pmndrs/drei)** & **[@react-three/postprocessing](https://github.com/pmndrs/react-postprocessing)**
+- **[Tailwind CSS](https://tailwindcss.com/)**
+- **[Vite](https://vitejs.dev/)**
+
+---
+
+## 🚀 Getting Started
+
+To run this visualizer locally and experience the hyper-reactive geometry for yourself:
+
+```bash
+# Clone the repository
+git clone https://github.com/jnsilva-labs/awarenessparadox-visualizer.git
+
+# Navigate into the project
+cd awarenessparadox-visualizer
+
+# Install dependencies
+npm install
+
+# Start the local development server
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser. Drag and drop any `.mp3` file, or select a microphone input, to begin the visualization.
